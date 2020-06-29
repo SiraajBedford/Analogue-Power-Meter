@@ -1,0 +1,102 @@
+\chapter{Phase shift transducer}
+\section{Theory and related work} \label{sec:literature_phase}
+
+A phase detector or phase comparator is a frequency mixer, analog multiplier or logic circuit that generates a voltage signal which represents the difference in phase between two signal inputs. It is an essential element of the phase-locked loop (PLL) \cite{phase_wiki}.
+Phase detection can be accomplished by measuring the time delay between two voltage signals, in our case this will be a voltage signal representing a PWM signal formed by taking the XOR of the current-voltage signal over current sense resistor and the nominal input voltage of the voltage peak transducer. This PWM signal has a DC value that needs to be extracted from the frequency domain through a Low Pass Filter (LPF) using a single resistor and capacitor combination \cite{DC_Analogue}.
+A comparator is used to convert the current and voltage signals to have amplitudes of TTL levels \cite{Comparator} for the XOR to take in as inputs.
+
+\section{Design} \label{sec:design_phase}
+
+The phase shift will be converted to a analogue level in the following manner:
+\begin{itemize}
+    \item Two separate comparators will be used.
+    One to compare the nominal voltage signal (from the voltage peak detector) to zero (ground) and one to compare the voltage-represented current signal over the current sense resistor to zero. If the inputs (as seen in Fig. \ref{fig:phase_diag}), $V_{voltage-in}$ or $V_{current-in}$, is more than zero, the signal will be pulled to the positive rail (\SI{+5}{VDC} of the LM7805) of the op-amp. The voltage will be pulled to the negative rail (\SI{-5}{VDC} of the charge pump) if the input voltage $V_{voltage-in}$ or $V_{current-in}$ is less than zero.
+    \item Since the XOR CD4070B package works on a high TTL logic voltage \\$V_{OH}=$ \SI{5}{\volt DC} and a low logic voltage $V_{OL}=$ \SI{0}{\volt DC} \cite{CD4070b}. The output voltages of comparators U3 and U5 must have these maximum and minimum voltages. Therefore we use 1N4007 general purpose diodes to rectify he negative voltage of the comparator output to ground.
+    \item We will then able to use the XOR package since $V_{XOR-in1}$ and $V_{XOR-in2}$ as seen in Fig. \ref{fig:phase_diag} have high and low TTL levels.
+    \item The output of the XOR gate is defined as:$$V_{XOR-out}=V_{XOR-in1} \oplus V_{XOR-in2}$$ where $V_{XOR-out}$ represents a high voltage of \SI{5}{\volt DC} for the time when the signals $V_{voltage-in}$ and $V_{current-in}$ are out of phase. This can be illustrated through the use of a logic basis shown in logic rows 2 and 3 of table \ref{XOR_table}. 
+    \item The output of the XOR will represent a PWM signal. The DC voltage component of the signal is filtered out using a simple LPF. The filtered DC component is then amplified using a non-inverting gain op-amp to better suit the ranges as described in \cite{assignment_2}.
+\end{itemize}
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[trim=0 5cm 0 4cm,scale=.45]{Figures/Phase_overleaf.pdf}
+    \caption{Phase transducer circuit}
+    \label{fig:phase_diag}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+Input 1   & Input 2   & Output       \\ \hline
+$V_{XOR-in1}$ & $V_{XOR-in2}$ & $V_{XOR-out}$ \\ \hline
+0         & 0         & 0            \\ \hline
+0         & 1         & 1            \\ \hline
+1         & 0         & 1            \\ \hline
+1         & 1         & 0            \\ \hline
+\end{tabular}
+\caption{Table showing output level scenarios for $V_{XOR-out}$}
+\label{XOR_table}
+\end{table}
+
+The characteristic op-amp voltages and design choices for the phase detector components are as follows:
+\begin{itemize}
+     \item The common mode voltage, $V_{CM}$, for U3 and U5 which is the allowed input voltage at the positive and negative inputs of U3 and U5 are: \\$-5.3<V_{CM}<4$ [V] for supply voltages of \SI{+-5}{\volt DC} \cite{TLC2272}. Since $V_{voltage-in}\approx \SI{2}{\volt_{peak}}$ and $V_{current-in}\approx \SI{1.3}{\volt_{peak}}$ at a maximum, the common mode voltages are satisfied at an ambient temperature, $T_A=$\SI{25}{\degreeCelsius} \cite{TLC2272}.\\The maximum differential input voltage is $V_{diff}=$ \SI{+-16}{V_{peak}}. We calculate the differential voltages for U3 and U5: $V_{U3_{diff}}=2-0=\SI{2}{V_{peak}}$ and $V_{U5_{diff}}=1.3-0=\SI{1.3}{V_{peak}}$. Both these voltages are less than $V_{diff}$ and differential conditions are met.
+     \item The op-amp gain design of U2 is calculated in Section \ref{sec:design_current}.
+     \item Diodes D1 and D2 are chosen as 1N4007 general purpose diodes. Also they are the only ones provided. They can support a reverse voltages up to \SI{700}{V_{RMS}} and up-to \SI{1}{\ampere} of forward currents \cite{1N4007} which is more than the absolute maximum ratings of the TLC2272 op-amps\cite{TLC2272}.
+     \item The LPF characterized by $R_1$ and $C_1$ in Fig. \ref{fig:phase_diag} is used to filter out the DC component in the frequency domain.
+     We calculate these values using: $f_c=\frac{1}{2 \pi R_1 C_1}$ \cite{DC_Analogue} where $f_c$ is the center frequency (DC-component frequency in frequency domain) of $V_{XOR-out}$, since the system frequency is \SI{50}{\hertz} \cite{DC_Analogue}, \\$f_c=\frac{50}{2}=25$ Hz $\therefore$ calculate the time constant as , $\tau_{1}=\SI{6.37}{\milli\second}=R_1 \cdot C_1$, choosing $R_1$=\SI{6.8}{\kilo\ohm}, $C_1$=\SI{0.94}{\micro\farad}. Here we want to minimize  signal ripple and maintain an average response speed $\therefore$ we experimentally choose $C_1$=\SI{55}{\micro\farad}. The new time constants is $\tau_{new}=\SI{374}{\milli\second}$. Which means that the phase analogue output achieves 63\% of the steady-state value within approximately one third of a second.
+     \item The simulated maximum output of the LPF will be close to \SI{0.8}{\volt DC}. Therefore we scale up the voltage using a non-inverting op-amp U4 with a voltage gain of  $A_v=6.6=1+\frac{R_5}{R_4}$. $\therefore$ choosing that $R_4=\SI{1}{\kilo\ohm}$, then $R_5=\SI{5.6}{\kilo\ohm}$
+\end{itemize}
+
+\section{Simulation} \label{sec:simulation_phase}
+
+The simulated graphs shown in Figures \ref{fig:phase22u} (Appendix B) and \ref{fig:phase33u} (also Appendix B) show that in both cases, the DC analogue output reaches a voltage close to \SI{3.5}{\volt DC} at steady state. This is expected as there is only a slight difference in their current phase angles, i.e., $\Delta\phi_{I}=$\SI{0.7}{\degree} as calculated by: 
+$$\Delta\phi_{I}=\phi_{22u}-\phi_{33u}=\arctan(-\frac{1}{\omega\cdot R_1 \cdot 22\mu})-\arctan(-\frac{1}{\omega\cdot R_1 \cdot 33\mu}), \ \omega=2 \pi f=100 \pi$$
+ 
+\section{Measurements} \label{sec:measurements_phase}
+
+
+
+{\footnotesize The phase transducer's analogue output at a mid-range load of \SI{1}{\kilo\ohm} and \SI{22}{\micro\farad}, as viewed on channel 2 of the oscilloscope is shown in Fig.\ref{subfig:phase_oscillo}. When comparing this output to the analogue output in Fig. \ref{fig:phase22u} (Appendix B), they have a difference of \SI{0.5}{V} meaning the design is successful. The AC component shown in Fig. \ref{fig:phase_noise} does \textbf{not show} noise but rather the small-amplitude ripple of the DC output. This ripple with an a periodic amplitude of 70 mV is some of the unfiltered AC component of $V_{XOR-out}$. Table \ref{phase_table} summarizes data for when the system is stimulated with varying resistive and capacitive loads \cite{assignment_2}.  The conversion column values in table \ref{phase_table} were obtained by simulating different supply currents at different phase angles to fit the DC analogue level.}
+% In this example the {\huge huge font size} is set and 
+% the {\footnotesize Foot note size also}. There's a fairly 
+% large set of font sizes.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+     \centering
+    \includegraphics[height=4cm,width=\textwidth-0.5cm]{Figures/phase_mid_range.jpg}
+    \caption{Phase XOR input AC signal(Channel 1) and analogue output level (Channel 2)}
+    \label{subfig:phase_oscillo}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+     \centering
+    \includegraphics[height=4cm,width=\textwidth]{Figures/phase_noise2.JPG}
+    \caption{Noise on analogue output of the phase transducer}
+    \label{fig:phase_noise}
+\end{subfigure}
+\label{phase_practical}
+\caption{Phase transducer practical measurements}
+\end{figure}
+
+
+\begin{table}[H]
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\begin{tabular}[c]{@{}c@{}}Measurement\end{tabular}       & \begin{tabular}[c]{@{}c@{}}Load\\  R \\ {[}\si{\ohm}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Load \\ C\\ {[}\si{\micro\farad}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Meas-\\ ured \\ Shift{[}\si{\milli\second}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Applied\\ Shift |$\phi$|\\ {[}\si{\degree}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Output\\ Level \\ {[}\si{\volt}DC]\end{tabular} & \begin{tabular}[c]{@{}c@{}}Conver-\\sion\\ {[}\si{\degree}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Differ-\\ ence \\ {[}\si{\degree}{]}\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}c@{}}
+No \\ phase \\ shift\end{tabular}  & open& none&10&90&4.92&88.1&1.9\\ \hline
+\begin{tabular}[c]{@{}c@{}}
+Max\\  phase \\ shift\end{tabular} & 1k  & 3.3 & 0.32&43.97&1.4&40.1&3.87\\ \hline
+Mid range& 1k& 22&0.6&8.23&3.04&7.2&1.03\\ \hline
+Mid +s& 1k& 33&1.3&5.51&3.81&4.6&3.87\\ \hline
+Mid +2s& 1k& 47&1.4&3.87&3.89&2.6&1.27\\ \hline
+\end{tabular}
+\caption{Phase transducer integrated tests}
+\label{phase_table}
+\end{table}
+

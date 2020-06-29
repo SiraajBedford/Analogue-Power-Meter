@@ -1,0 +1,132 @@
+\chapter{Over-current protection} \label{sec:OC}
+
+% Follow the same format as the previous chapters - circuit diagram, and then simulated and measured results. 
+
+\section{Design} \label{sec:sw_design}
+
+Over current protection is protection against excessive currents or current beyond the acceptable current rating of equipment. It generally operates instantly \cite{OverC}. In this design an SR latch \cite{SR_Latch} was implemented to output the trip status of the current switch. The logic of an SR Latch can be seen in table \ref{SRTT}. The switch is in a conducting state when S=1 and R=0 and the switch is in a non-conducting  when S=0 and R=1. S is represented as "$S_{beetle}$" in the circuit diagram in Fig. \ref{fig:Latch_OC}. This input remains a digital low (0 volt) as controlled by one of the digital pins of the Arduino Leonardo \cite{beetle} to remain in a latch state (S=0 and R=0) till the latch output is no longer conducting. Then a pulse is sent via S to reset the trip again. R is represented as "$R_{comparing \ 200mA}$" in Fig. \ref{fig:Latch_OC}. R is the output of a comparator. The comparator constantly compares the output of the current transducer \ref{sec:itrans} to a reference voltage level representing 200 mA. When the current transducer output is below this reference level, then R=0. When the current transducer output is above this reference level, then R=1.
+
+
+
+\begin{table}[H]
+\centering
+\caption{SR Latch truth table}
+\begin{tabular}{|c|c|c|}
+\hline
+S & R & Q     \\ \hline
+0 & 0 & Latch \\ \hline
+0 & 1 & 0     \\ \hline
+1 & 0 & 1     \\ \hline
+1 & 1 & Unknown     \\ \hline
+\end{tabular}
+\label{SRTT}
+\end{table}
+
+
+
+The design of the SR latch was directly obtained from \cite{SR_Latch}, but the transistors were swapped for 2N3904 BJTs. The two latch BJTs in Q1 and Q2 in \ref{fig:Latch_OC} act as switches.
+
+\begin{itemize}
+    \item $R_8$ and $R_9$ act as high impedance input resistors to limit the effect of current from $R_{comparing \ 200mA}$ and $S_{beetle}$ voltage sources such that do not affect the logic operation of the latch. Let $R_8=R_9=\SI{10}{\kilo \ohm}$.
+    \item $R_6$ and $R_7$ are used to limit base currents, let $R_6=R_7=\SI{100}{\kilo \ohm}$.
+    \item $R_{10}$ and $R_{11}$ are used as current-limiting resistors. If we design for a "On" state for the transistors, we design for a collector current of \SI{5}{\milli \ampere}, then $R_{10}=R_{11}=\frac{5}{1m}=\SI{1}{\kilo \ohm}$.
+    \item $R_{12}$ and $R_{13}$ also act as current-limiting resistors to limit interaction between the bases and collectors of Q1 and Q2.
+    Set $R_{12}=R_{13}=\SI{10}{\kilo \ohm}$.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[trim={5cm 0 5cm 0},clip,scale=0.7]{A3/Latch1.pdf}
+    \caption{Over-current operational diagram including SR latch, current-supported voltage buffer, comparator and optocoupling-triac switch}
+    \label{fig:Latch_OC}
+\end{figure}
+
+% trim={<left> <lower> <right> <upper>}
+
+With regards to the current-supported voltage buffer represented by U5 and Q3 with $R_{14}$ in Fig. \ref{fig:Latch_OC}, it is used due to problems experienced in simulation where the output of the SR latch would present a logical high (5 volt), but when directly connected to U6 (the optocoupling-triac switch), the output would present as 1 volt (not enough voltage to turn on the internal LED of the opto-coupling triac). A normal voltage follower was then used, but the problem persisted. A  current-supported voltage buffer was then added to resolve the problem. The resistor $R_{14}$ can be increased till the output voltage of the buffer is more than the typical forward voltage, $V_{\gamma}=\SI{1.2}{\volt}$ of the MOC3020 \cite{MOC_opto}. The current will then also be enough to fully turn on the internal LED, thereby letting the source voltage drop over the load. A \hl{TVS} is connected over the load to protect from over-voltage transients. We were given he choice to use a P6KE43CA TVS \cite{P6KE} or BZW06-28B TVS \cite{BZW06}. The BZW06-28B TVS was chosen due to a higher steady state power dissipation on infinite heat sink of 5 W compared to 1.7 of the BZW06-28B TVS.
+
+\section{Simulation} \label{sec:sw_simu} 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.35]{A3/LatchRes1.pdf}
+    \caption{Simulation of trip-point with ramping function at comparator input}
+    \label{fig:Latch_OC_Res}
+\end{figure}
+
+Fig. \ref{fig:Latch_OC_Res} shows a ramping function represented as "V(ramp)" that simulates the current transducer input to the comparator. It makes the comparator high when exceeding the reference voltage level at 3 volt of U7. In turn "V(Q\_trip)" is made low and the opto-coupling triac is in a non-conducting state. Before the trip point, the switch is in a conducting state represented by "V(V\_mains\_TRIAC\_result)".
+
+\section{Measurements} \label{sec:sw_meas}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+     \centering
+    \includegraphics[scale=0.8]{A3/tripoverall.JPG}
+    \caption{Trip measurement showing the switch stays off and also illustrating dead-time of the source voltage}
+    \label{subfig:trip1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+     \centering
+    \includegraphics[scale=0.8]{A3/measutrip.JPG}
+    \caption{Accurate measurement of the trip time}
+    \label{subfig:trip_accurate}
+\end{subfigure}
+\label{trip measurements}
+\caption{Switch trip time measurements}
+\end{figure}
+
+Fig. \ref{subfig:trip1} shows that when an opto-coupling triac is used, the load is not continuous anymore because dead time is apparent. This is due to the time that the triac takes to turn on every cycle.
+Fig. \ref{subfig:trip_accurate} shows an accurate measure on the time that the switch takes to turn on due to trip. It is measured as approximately \SI{7.5}{\milli s}. We compare this to the simulated trip time which is approximately \SI{110}{\micro s} measured from Fig. \ref{fig:sim_tripttt}. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.35]{A3/tripttt1.pdf}
+    \caption{Simulated trip time}
+    \label{fig:sim_tripttt}
+\end{figure}
+
+Although our practical system measurements is relatively far from our simulated value, the trip time is still less than \SI{150}{\milli s} as described in \cite{assignment_3}. Thus, our design is acceptable since the load voltage is completely switched off without any back-EMF voltage and stays completely off.
+
+
+
+
+\section{Summary and implementation}
+% State whether your design performs as expected. 
+We can conclude that the over-voltage and over-current design worked efficiently enough such that the circuit trip every time it was expected to. Implementation was very simple and results were accurate enough to meet project specifications.
+
+\begin{figure}[H]
+    \centering
+  	\includegraphics[scale=0.4]{Picures/overcurrentpic.PNG}
+	\caption{Implementation of the over-current circuitry} \label{subfig:OC_pcb}
+ \end{figure}
+% trim={<left> <lower> <right> <upper>}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

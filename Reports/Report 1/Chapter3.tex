@@ -1,0 +1,95 @@
+\chapter{Switchmode regulation}
+\section{Theory and releated work} \label{sec:literature_switchmode}
+
+A switchmode regulator is a regulator using a switching element to transform the supply into alternating current, which is then converted to a different voltage using capacitors, inductors and other elements, then is converted back into a DC voltage. The circuit or package normally includes regulation and filtering components to insure a steady output. Advantages include the ability to generate voltages beyond the input supply range and high efficiency, while disadvantages include build complexity \cite{SwitchmodeSite}.
+
+\section{Design} \label{sec:design_switchmode}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{Figures/lm.JPG}
+    \caption{Recommended mode for adjustable output \cite{TI:LM2595}}
+    \label{fig:adjustable_LM2595}
+\end{figure}
+
+In the above figure, there are a number of passive components whose values are recommended in \cite{TI:LM2595}. They are the following:
+
+\begin{align*} 
+&C_{OUT} = C_{IN} = 120 \text{ $\mu$F, 25-V aluminum electrolytic Nichicon, PL Series,}  \\ 
+&D_1 \text{ is a 1N5822, 3 A, 40 V Schottky rectifier diode,}\\
+&L1 = 100 \text{ $\mu$H, but we use a 68 $\mu$H inductor}\\
+&R1 = 1  \text{ k} \Omega \\
+\end{align*} 
+
+The remaining two components, i.e., $R_2$ and $C_{FF}$  determine the value of the output voltage of the regulator which is where our design choice comes into account. What we want to do is obtain a  $+5 \text{ VDC}$ and $-5 \text{ VDC}$ supply. We will be using the MC78L05 linear regulator to supply the $+5 \text{ VDC}$ supply. The maximum input voltage to this regulator is 30 V \cite{MC75VReg} and due to the dropout voltage for this regulator being 1.7 V \cite{MC75VReg}, the minimum input voltage is $V_{Min} = V_{Reg} + V_{Dropout} = 5 + 1.7 = 6.7$ V . So a choice for the output voltage of the switchmode regulator being $V_{switch} = 12$ V is suitable. The charge pump scheme can be manipulated such that we need can supply it with a voltage higher than the negative voltage we want to obtain.
+
+In \cite{TI:LM2595} the following equation is given in regards to an adjustable output voltage: 
+
+\begin{equation}
+    V_{OUT} = V_{REF}(1 + \frac{R_1}{R_2})
+    \label{eq:differential}
+\end{equation}
+
+since we want the output voltage to be 12 V, $V_{OUT} = 12 V$ and $V_{REF} = 1.23 V$ (given in \cite{TI:LM2595}). Also $R_1 = 1 \text{ k} \Omega$ . As such we choose a standard e12 resistance, $R_2 = 8.2  \text{ k} \Omega$ to gives us an output voltage close to 12 V by equation \ref{eq:differential}.
+The capacitance of 
+\begin{equation}
+    C_{FF} = \frac{1}{31(10^3)} \cdot R_2
+    \label{eq:cap}
+\end{equation} 
+which gives us $C_{FF} \approx 4$ nF.
+
+The simulated circuit becomes:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=.7]{Figures/LM2595lts.JPG}
+    \caption{LT Spice circuit for the switchmode regulator} 
+    \label{fig:adjustable_LM2595_sim}
+\end{figure}
+
+
+\section{Simulation} \label{sec:simulation_switchmode}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[scale=.55]{Figures/LM2595out.JPG}
+  \caption{Output voltage of switchmode regulator}
+  \label{fig:switch_sim_out}
+\end{subfigure}
+\end{figure}
+
+As seen in \ref{fig:switch_sim_out} the steady output voltage is around 12 V, which is what we have designed for.
+
+\section{Measurements} \label{sec:measurements_switchmode}
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \includegraphics[scale=1]{Figures/real_switchmode_output.JPG}
+  \centering
+  \caption{Measured switchmode voltage regulator output}
+  \label{fig:Switch_out_real}
+\end{subfigure}
+\\
+\begin{subfigure}{.5\textwidth}
+\centering
+  \includegraphics[scale=1]{Figures/switchmode_noise.JPG}
+  \centering
+  \caption{Switchmode regulator noise}
+  \label{fig:switch_noise}
+\end{subfigure}
+\end{figure}
+
+We obtain the measured result for the output voltage as seen in figure \ref{fig:Switch_out_real}. The maximum steady output voltage is shown to be 11.2 V.
+
+The noise was also measured as seen in figure \ref{fig:switch_noise}. We can see that the noise is contained between -10 mV and +20 mV which is desirable. 
+It can be concluded that our measured results agree with our simulated results.
+
+
+
+
+
+
+

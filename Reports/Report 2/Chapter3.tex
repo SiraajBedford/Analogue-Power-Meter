@@ -1,0 +1,102 @@
+\chapter{Current peak transducer}
+
+\section{Theory and related work} \label{sec:current_theory}
+
+A current peak transducer is configured to follow the peak voltage over a current sense resistor. The peak voltage is monitored when different loads that (in our case a purely resistive load for testing) induce different current levels are to be monitored. A positive peak detector captures the most positive peak of the voltage signal at its input \cite{precision_peak_detector}. Inaccurate peak detection circuits only require a diode and capacitor combination to charge up to the approximate peak voltage, but since we want to accurately follow the peak-to-peak voltage over a small current sense resistor which is amplified using a non-inverting amplifier \cite{non-inverting}, a precision peak detector, analogous to the one used in Section \ref{sec:design_vpd1} can be used to get rid of this error.
+
+\section{Design} \label{sec:design_current}
+
+The $0 \ to \ 285$ mA will be converted into a DC analogue voltage in the following manner:
+\begin{itemize}
+    \item Different load currents will be emulated by using different resistive load sizes. Consider the case of he maximum load current of $285$ mA as an example. This  will be when $R_{load}=100 \ \Omega$.
+    \item This will result in the voltage over $R_{sense}$ being a maximum, i.e., \\$V_{R_{sense}} \approx 8.55$ mV. Other current levels can be emulated in the same way.
+    \item $V_{R_{sense}}$ will be up-converted using the non-inverting op-amp U1 to \\$V_{Nominal Input}=151\cdot8.55m\approx 1.27$ V. $V_{Nominal Input}$'s peak will be detected then that voltage will be fed into the non-inverting op-amp U2 to be scaled to a voltage between 0 and 5 VDC.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[trim=0 5cm 0 4cm,scale=.4]{Figures/Current_overleaf1.pdf}
+    \caption{Current transducer circuit}
+    \label{fig:current_diag}
+\end{figure}
+
+The operational functionality of the voltage peak detection sub-circuit dominated by U3 and U4 of the current transducer circuit is discussed in section \ref{sec:design_vpd1} and will not be repeated in this section.
+Op-amp characteristic voltages and surrounding components are considered and calculated as follows:
+\begin{itemize}
+ \item The common mode voltage, $V_{CM}$, for U3 and U4 which is the allowed input voltage at the positive and negative inputs of U3 and U4 are: $-5.3<V_{CM}<4$ [V] for supply voltages of \SI{+-5}{\volt DC} \cite{TLC2272}. Since $V_{Nominal Input}=1.3$ V at a maximum, the common mode voltages are satisfied at an ambient temperature, $T_A=$\SI{25}{\degreeCelsius} \cite{TLC2272}.\\The differential input voltage is $V_{diff}=$ \SI{+-16}{V_{peak}}, since there feedback on U3 and U4, the positive and negative inputs will be close to each other so that the differential input voltage specification is within bounds.
+\item The feedback resistor is chosen as $R_1=20\ k\Omega$ for the same reason in Section \ref{sec:design_vpd1}, i.e.,that it needs to be big for efficient voltage feedback and chosen for small currents.
+  \item Diodes $D_1$ and $D_3$ are chosen to be 1N4007 general diodes because they were the only provided. The forward resistance of $D_3$ is calculated as: $R_{diode}=\frac{V_T}{I_{diode}}=\frac{26m}{5\mu}\approx\SI{5.2}{\kilo\ohm}$, where $I_{diode}$ was chosen as the reverse peak current in
+  \cite{1N4007}. We also know that to design for a fast transient of the tracking the peak we can choose\cite{voltage_peak_detector}: $R_{diode}\cdot C_1 \leq \frac{1}{10}T  \ \ \ \therefore C_2\approx384.6 \ nF \ \ \ \therefore choose \  C_2=100\ nF$ for better response time (although we are more concerned about choosing a smaller capacitance value for reducing the ripple than for increasing response time).
+\end{itemize}
+
+The following components were also chosen for the current transducer system as a whole:
+\begin{itemize}
+    \item $R_{sense}=30 \ m\Omega$ for better voltage increments to support an ADC resolution of 10 bits. This resistor was chosen over the $5 \ m\Omega$ supplied due to the resolution considerations for the ADC.
+    \item Non-inverting gain op-amp U1 is chosen to amplify the voltage over  $R_{sense}$ for visible peak detection of the voltage peak detector. As we know, the voltage gain is calculated as: $A_v=1+\frac{R_3}{R_4}$. These resistors can be seen in Fig. \ref{fig:current_diag}. \\A voltage gain of 151 was chosen by setting $R_4=1 \ k\Omega$ and thus $R_3=150 \ k\Omega$ \\Non-inverting gain op-amp U2 is chosen to amplify the voltage at the output of the peak detector so that the output analogue voltage of the transducer would visibly be between 0 and 5 volt. As we know, the voltage gain is calculated as: $A_v=1+\frac{R_2}{R_5}$. These resistors can be seen in Fig. \ref{fig:current_diag}. \\A voltage gain of 3.2 was chosen by setting $R_5=1 \ k\Omega$ and thus $R_3=2.2\ k\Omega$.
+\end{itemize}
+
+In a functional summary, a 10 mA change decrease in $I_{R_{sense}}$ will make the output of the U1 decrease by some voltage $\delta V$. Then $V_{Nominal Input} \approx151\cdot\delta V$. This peak voltage is tracked by the voltage peak detector and finally fed into U2 Thus the output of U2, $V_{Nominal Output} \approx151\cdot\delta V\cdot3.2$. It must be noted that impact deviations on the input as a result of noise on rail and input voltages result in minor changes at the peak detector output of a few mV. These minor errors are amplified by the non-inverting amplifiers \cite{non-inverting} and cause a few mV changes on $V_{Nominal Output}$, but not out of project tolerances \cite{assignment_2}.
+
+\section{Simulation} \label{sec:simulation_current}
+
+ %ref appen here
+The graphs in Fig. \ref{fig:nominal_current} (Appendix B) show the nominal input at the input of the voltage peak detector of the current transducer, a step change of 10 mA is included to make sure that the requirement mentioned in the assignment guidelines \cite{assignment_2} is met. The output clearly shows a response within 1 second after 0.5 seconds. The circuit performs as expected for system input currents ranging between 0 and 285 \si{\milli\ampere} and thus the system functions properly.
+
+
+\section{Measurements} \label{sec:measurements_current}
+
+The current peak transducer's analogue output at a mid-range load of \SI{1}{\kilo\ohm} is viewed on channel 2 of the oscilloscope is shown in Fig.\ref{subfig:current_sig}. When comparing this output to the analogue output in Fig. \ref{fig:nominal_current} (Appendix B) for $t<0.5s$, they are very close meaning the design is successful. The AC component shown in Fig. \ref{subfig:current_noise} does \textbf{not show} noise but rather the small-amplitude ripple of the DC output. This ripple with an a periodic amplitude of 30.4 mV helps track the peak voltage due to the time constant formed by $C_2$. Table \ref{cur_test_unit} summarizes data for when the system is stimulated with varying voltages, i.e, if it could respond to a 10 mA change in one second and also the test was performed to test the reliability of the op-amp for the required (emulated) current levels \cite{assignment_2}.
+
+
+ \begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth,height=5cm]{Figures/Current_Signals.JPG}
+    \caption{Integrated test input peak signal  (Channel 1) and current output analogue signal (Channel 2)}
+    \label{subfig:current_sig}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth-0.5cm,height=5cm]{Figures/Current_Noise.JPG}
+   \caption{Noise on current transducer's analogue output}
+    \label{subfig:current_noise}
+\end{subfigure}
+\label{current_practical}
+\caption{Current transducer practical measurements}
+\end{figure}
+
+\begin{table}[H]
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\begin{tabular}[c]{@{}c@{}}Emulated Level\\ {[}\si{\milli\ampere_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Signal \\ Generator \\ {[}\si{\milli\volt}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Signal \\ Generator\\ {[}\si{\milli\volt}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Analogue\\  Output \\ {[}\si{\volt DC}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Deduced\\  Input \\ {[}\si{\milli\ampere_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Difference \\ {[}\si{\milli\ampere}{]}\end{tabular} \\ \hline
+0      &0.00  &0.00 &0.25  &17.25   &17.25\\ \hline
+50     &1.50  &1.26 &0.77  &53.12   &3.12\\ \hline
+100    &3.00  &2.25 &1.28  &88.30   &11.7\\ \hline
+101    &3.04  &2.29 &1.30  &89.68   &11.32\\ \hline
+102    &3.07  &2.32 &1.31  &90.37   &11.63\\ \hline
+200    &6.00  &5.69 &2.75  &189.1   &10.90\\ \hline
+285    &8.60  & 8.26&3.99  &270.8   &14.2\\ \hline
+
+\end{tabular}
+\caption{Current transducer unit-level tests}
+\label{cur_test_unit}
+\end{table}
+
+ Table \ref{cur_test_integrated} summarizes information aimed at actual system-testing, i.e., when the \SI{20}{\volt AC} was connected to the current transducer's s inputs. For table \ref{cur_test_integrated} \textbf{no curve-fit} was used.
+
+\begin{table}[H]
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\begin{tabular}[c]{@{}c@{}}Measure-\\ ment\\ \\ Load\end{tabular} & \begin{tabular}[c]{@{}c@{}}Load\\  R1 \\ {[}\si{\ohm}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Load \\ R2\\ {[}\si{\ohm}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Meas-\\ ured \\ Input Vr \\ {[}\si{\milli\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Actual \\ Input\\ {[}\si{\milli\ampere_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Analo-\\ gue\\ Output \\ {[}\si{\volt DC}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Deduced \\ Input\\  {[}\si{\milli\ampere_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Differ-\\ ence \\ {[}\si{\milli\ampere}{]}\end{tabular} \\ \hline
+None& open& none             &0.00  &0      &0.24 &0.02  &0.02\\ \hline
+Full& 100& none              &9.50  &296    &4.53 &312.5 &16.50\\ \hline
+Mid& 1k& none                &1.06  &30.40  &0.521&35.94 &5.54\\ \hline
+Mid + $\delta$& 1k&24k       &2.16  &31.67  &0.522&36.00 &4.33\\ \hline
+Mid + $2\delta$& 1k&12k      &2.52  &32.93  &0.555&38.29 &5.36\\ \hline
+\end{tabular}
+\caption{Current transducer integrated tests}
+\label{cur_test_integrated}
+\end{table}
+ 
+For the deduced columns in tables \ref{cur_test_unit} and \ref{cur_test_integrated}, the following formula (obtained from the transfer function) was used to approximate the input:$$I_{R_{sense}}=\frac{V_{Nominal Output}}{(1+\frac{R_3}{R_4})\cdot(1+\frac{R_2}{R_5})}\cdot \frac{1}{R_{sense}}$$ where $V_{Nominal Output}$ is the DC analogue output and $I_{R_{sense}}$ is the current through the sense resistor in Fig. \ref{fig:current_diag}. The formula contains non-inverting op-amp gains of U1 and U2 as well as $R_{sense}$.

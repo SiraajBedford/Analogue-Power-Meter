@@ -1,0 +1,112 @@
+%==== Document Setup (usthesis)======================================
+\documentclass[masters-a,                       %... Document type
+               12pt,oneside,openany,a4paper, %... Layout
+               a5block,                      %... A5 type block
+              afrikaans ,english,           %... Afrikaans default language
+               ]{usthesis}
+
+\usepackage{siunitx}
+\usepackage{lipsum} 
+\usepackage{graphicx}% http://ctan.org/pkg/graphicx
+\usepackage{multirow}% http://ctan.org/pkg/multirow
+\usepackage{booktabs}% http://ctan.org/pkg/booktab
+\usepackage{amssymb}
+\usepackage{subcaption}
+\usepackage{float}
+%
+% PLEASE read the USthesis documentation for the class options
+% and how to set line and paragraph spacing
+%
+
+%==== Math setup ====================================================
+ \usepackage{amsmath}%............................ Advanced math (before fonts)
+ %\usepackage{amssymb}%............................ AMS Symbol fonts
+
+%==== Font setup (default is Computer Modern) =======================
+ \usepackage[T1]{fontenc}%........................ Type 1 fonts
+ \usepackage{textcomp}%........................... Additional text character
+ \usepackage{bm}%................................. Bold math symbols (after fonts)
+\usepackage{multirow}
+%==== Ref's, Bib's and Nomencl ======================================
+ \usepackage{usnomencl}%.......................... List of symbols (in usthesis pack)
+
+ \usepackage{usbib}%.............................. Bibliography    (in usthesis pack)
+    \bibliographystyle{usmeg-n}
+    \renewcommand\bibfont{\small}
+    %% For usmeg-a, the bib is a list of references. If you
+    %% are using usmeg-n comment out the following lines
+
+    \renewcommand{\bibname}{References} 
+
+%==== Graphics and Color ============================================
+\usepackage{graphicx}%........................... Graphicx loaded in usthesis
+\usepackage{color}%.............................. Color setup
+
+%==== Additional USthesis packages ==================================
+
+\usepackage{ussummary}%.......................... Mech Eng summary page (in usthesis pack)
+
+%==== Local Defs ====================================================
+\makeatletter
+
+
+\makeatother
+%==== Title Page ====================================================
+
+\title{Report for E-design 344}
+
+\author{Siraaj Bedford}
+       {Siraaj Bedford\\
+           21093741}
+
+\subject{E-Design 344}
+        {}
+
+\ReportDescript{E-Design report \# \textcolor{red}{2}}
+
+\address{Departement of Electrical and Electronic Engineering,\\
+         Universiteit van Stellenbosch,\\
+         Privaatsak X1, Matieland 7602.}
+
+%\studyleader{Name of supervisor}
+
+\setdate{9}{2019}
+%====================================================================%
+%                 T H E   M A I N   D O C U M E N T                  %
+%====================================================================%
+\begin{document}
+
+\frontmatter%========================================================
+
+\TitlePage
+\include{declaration}
+\tableofcontents
+\listoffigures
+\listoftables
+\include{nomenclature}
+
+\mainmatter%=========================================================
+
+\include{Chapter1}
+\include{Chapter2}
+\include{Chapter3}
+\include{Chapter4}
+\include{Chapter5}
+
+
+\appendix%===========================================================
+
+
+\backmatter%=========================================================
+
+\bibliography{References}
+\renewcommand{\thesection}{A.\arabic{section}}
+\renewcommand{\thechapter}{A.}
+\begin{appendix}
+
+\include{App-A}
+\include{App-B}
+\include{App-C}
+\include{App-D}
+\end{appendix}
+\end{document}

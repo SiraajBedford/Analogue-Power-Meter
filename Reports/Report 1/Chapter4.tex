@@ -1,0 +1,60 @@
+\chapter{Linear regulation}
+\section{Theory and related work} \label{sec:literature_linear}
+
+A linear voltage regulator is used to maintain a steady voltage. The input voltage will always be more than the output voltage of a linear regulator due to a minimum dropout voltage, the excess voltage gets dissipated as heat between the input and output terminals. The efficiency of a linear is relatively low to a switchmode regulator's efficiency.
+
+\section{Design} \label{sec:design_linear}
+
+The following typical application was found in \cite{MC75VReg}.
+The input capacitor, denoted by $C_{I} = 0.33 \mu$F is used to smooth the input voltage so that it usable for the internal electronics and $C_{O} = 0.1 \mu$F is used to smooth the output voltage of the regulator.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{Figures/LM7805_typ_application.JPG}
+    \caption{Typical Application for the linear regulator}
+    \label{fig:linear_reg_application}
+\end{figure}
+
+The resulting model is shown as a LT Spice figure:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=.5]{Figures/LM7805_ltspice.JPG}
+    \caption{LT Spice circuit model}
+    \label{fig:linear_reg_application}
+\end{figure}
+
+\section{Simulation} \label{sec:simulation_linear}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1.5]{Figures/LM7805_ltspice_sim.JPG}
+    \caption{Simulated output voltage}
+    \label{fig:5V_sim_output}
+\end{figure}
+
+Running the simulation and plotting the output voltage results in the graph in figure \ref{fig:5V_sim_output}. As we designed, the output voltage is very close to 5 V.
+
+\section{Measurements} \label{sec:measurements_linear}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{Figures/linear_reg_out.JPG}
+    \caption{Measured linear regulator output voltage}
+    \label{fig:linear_reg_noise_real_out}
+\end{figure}
+
+The measured output voltage in figure \ref{fig:linear_reg_noise_real_out} matches the simulated result.Thus we can conclude that our design was successful. The output is very steady and will be able to supply big resistive loads with enough current for their operations.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=1]{Figures/linear_reg_noise.JPG}
+    \caption{Linear regulator noise}
+    \label{fig:linear_reg_noise}
+\end{figure}
+
+The noise of the linear regulator is very important because it must be small enough such that the op-amps which will be connected later must not be affected by the noise on the op-amp rails. This could disturb the functioning of the op-amps. In figure \ref{fig:linear_reg_noise} we can see that the maxim noise level is around 12.8 mV and the minimum is around -4 mV. These are acceptable levels for our future applications.
+
+
+
+

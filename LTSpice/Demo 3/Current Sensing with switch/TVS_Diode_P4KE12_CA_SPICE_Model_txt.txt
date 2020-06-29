@@ -1,0 +1,13 @@
+**************************************************
+** Littelfuse P4KE12CA, TVS, bi-directional     **
+**                                              **
+** ITC, 04/09/05                                **
+**************************************************
+.SUBCKT P4KE12CA  1   2
+*    TERMINALS:   T1  T2
+Dpri  1 4 Dtvs
+Dsec  3 4 Dtvs
+Rleak 1 3 13meg
+Lind  3 2 2e-15
+.MODEL Dtvs D (RS=0.05 N=1.5 IBV=1m BV=11.0 CJO=450p)
+.ENDS

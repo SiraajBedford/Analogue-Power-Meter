@@ -1,0 +1,442 @@
+\chapter{Signal conditioning}
+
+%**********************************************
+\section{Voltage transducer} \label{sec:vtrans}
+%**********************************************
+
+\subsection{Design} \label{sec:vtrans_design}
+
+The design is chosen as a precision peak detector as described in \cite{voltage_peak_detector}. It is functionally controlled by U1 and U2 as follows: For the first case, the capacitor, $C_1$ is initially fully discharged, as such there is no voltage across it. This means that the voltage at the output of buffer amplifier U1 is also zero (discharged) which is also the case at the positive junction of $D_3$.\\At some time when a positive voltage, $V_{Nominal Input}$ is applied at $U_2$, $D_3$ becomes reversed bias and $D_1$ will become forward biased and the capacitor will get charged through the input loop to the peak voltage due to KVL.Since we know that $D_3$ is reverse biased and under the assumption that no current flows into the  negative input terminal of U2, we can assume that the current flowing through the feedback resistor $R_5$ is also zero. Therefore the voltage that appears at the output will be the same as that of the negative input of U2. For the second case, we consider when the input voltage goes below the peak voltage. Then $D_1$ will become reversed biased and the feedback loop will become undone. Then the negative input terminal of U2 will be at the peak voltage. The positive input of U2 will be less than that of the negative input and the output will momentarily become negative. Therefore $D_3$ will become forward biased, providing U2 with negative feedback such that it does not tend to negative saturation.
+$D_1$ is now reverse biased and prevents $C_1$ from discharging. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[trim=0 5cm 0 4cm,scale=.4]{A2/Voltage_overleaf.pdf}
+    \caption{Voltage transducer circuit}
+    \label{fig:voltage_system}
+\end{figure}
+
+
+As stipulated in the assignment guidelines \cite{assignment_2}, the peak detector circuit shall have a minimum input of  \SI{12}{\volt AC} and a maximum input of \SI{20}{\volt AC}. These high RMS voltages will be stepped-down using a voltage-divider circuit. The mains voltage supply is $V_2$ in Fig. \ref{fig:voltage_system}. $V_2=$\SI{20}{\volt AC} $\approx$ \SI{30}{\volt_{peak}}. Thus we choose \SI{250}{\milli\watt}-rated resistors, $R_1=1.5\ M\Omega$ and $R_2=100 \ k\Omega$ for the following reasons:
+
+\begin{itemize}
+    \item \hl{18VAC will be converted to low voltage analogue as follows
+    }: The voltage divider formula is: $V_{Nominal Input}=\frac{R_2}{R_1+R_2}\cdot V_{2}$ which guarantees a voltage close to $2 \ V_{peak}$.
+    \item $V_{Nominal Input}\approx$ $2 \ V_{peak}$ at its maximum, which is in-between the common-mode voltages chosen for the design configuration of the TLC2272 \cite{TLC2272} op-amps for the positive and negative supply voltages of \SI{+5}{\volt DC} and \SI{-5}{\volt DC} respectively of U1 and U2 as seen in \ref{fig:voltage_system}.
+\end{itemize}
+
+This stepped-down voltage's ($V_{Nominal Input}$) peak which can range from 0 to $2 \ V_{peak}$ is tracked by the precision detector. The characteristic voltages and component design choices for the peak detector are as follows:
+\begin{itemize}
+  \item The common mode voltage, $V_{CM}$, for U1 and U2 which is the allowed input voltage at the positive and negative inputs of U1 and U2 are: $-5.3<V_{CM}<4$ [V] for supply voltages of \SI{+-5}{\volt DC}
+  at an ambient temperature, $T_A=$\SI{25}{\degreeCelsius} \cite{TLC2272}.\\The differential input voltage, $V_{diff}=$ \SI{+-16}{V_{peak}}, since there feedback on U1 and U2 the positive and negative inputs will be close to each other the differential input voltage limit is met.
+  \item $R_5$ is a low-voltage feedback resistor, so current is minimal through it. Set $R=$\SI{10}{\kilo\ohm} for very low current values.
+  \item Diodes $D_1$ and $D_3$ are chosen to be 1N4007 general diodes because they were the only provided. The forward resistance of $D_1$ is calculated as: $R_{diode}=\frac{V_T}{I_{diode}}=\frac{26m}{5\mu}\approx\SI{5.2}{\kilo\ohm}$
+  where $I_{diode}$ was chosen as the reverse peak current in
+  \cite{1N4007}. We also know that to design for a fast transient of the tracking the peak we can choose \cite{voltage_peak_detector}: $R_{diode}\cdot C_1 \leq \frac{1}{10}T$ or better yet for faster response time: $R_{diode}\cdot C_1 \leq \frac{1}{1000}T \ \ \ \therefore C_1\approx3.8 \ nF \ \ \ \text{choose } C_1=1\ nF$
+\end{itemize}
+
+The system was designed to take the voltage output of the peak detector (the output of U1) and scale it up to a voltage ranging closer to \SI{5}{\volt DC} for better visibility. This was done by using a non inverting op-amp, U3, in Fig. \ref{fig:voltage_system} with a gain calculated using the gain formula in \cite{non-inverting}: $A_v=1+\frac{R_4}{R_3} $.
+A gain of 2.2 was decided on to get $V_{Nominal Input}\approx5$ VDC for full range. So choose $R_3=\SI{1}{\kilo\ohm}$, then $R_4=\SI{2.2}{\kilo\ohm}$.\\
+The \hl{delta-input-output} change formula can be see in \ref{eq:voltage_delta}. In a functional summary, a 1 volt change increase in $V_{Nominal Input}$ will make the output of the peak detector increase by some voltage $\delta V$. Then $V_{Nominal Output} \approx2.2\cdot\delta V$.
+It must be noted that impact deviations on the input as a result of noise ($\SI{4.8}{\milli \volt}$ and $\SI{48}{\milli \volt}$) on rail and input voltages result in minor changes at the peak detector output of a few mV. These minor errors are amplified by the non-inverting amplifier \cite{non-inverting} and cause a few mV changes on $V_{Nominal Output}$, but not out of project tolerances \cite{assignment_2}.
+
+
+% \begin{figure}
+%  \footnotesize
+%         \includegraphics[width=1\linewidth]{./Figures/cctdia.pdf}
+% 		    \caption{Voltage transducer circuit diagram.} \label{subfig:vtrans_circuit_diagram}
+%   \centering
+%  \end{figure}
+
+\subsection{Simulation} \label{sec:vtrans_simu}
+
+The graphs in Fig. \ref{fig:nomial_voltages} (\hl{Appendix B}) show the nominal input at the input of the peak detector, a step change to make sure that the requirement mentioned in the assignment guidelines \cite{assignment_2} is met and the output voltage of the voltage peak detector is also shown. The output clearly shows a response within 1 second after 0.5 seconds. The circuit performs as expected for system input voltages ranging between 12 and 20 \si{\volt AC}.
+
+% Here refer to Figures \ref{subfig:vtrans_simu_noload} and \ref{subfig:vtrans_simu_midload}.
+
+\subsection{Measurement} \label{sec:vtrans_meas}
+
+The voltage peak detector's analogue output at a mid-range load of \SI{1}{\kilo\ohm} is viewed on channel 2 of the oscilloscope is shown in Fig.\ref{subfig:v_ossc}. When comparing this output to the analogue output in Fig. \ref{fig:nomial_voltages} for $t<0.5s$, they are very close (a 4 mV difference) meaning the design is successful. The AC component shown in Fig. \ref{subfig:v_osc_noise} shows noise ranging from $\SI{4.8}{\milli \volt}$ and $\SI{48}{\milli \volt}$. Table \ref{v_test_unit} summarizes data for when the system is stimulated with varying voltages, i.e, if it could respond to a 1 V change in one second and also the test was performed to test the reliability of the op-amp for the required (emulated) peak voltages \cite{assignment_2}.
+
+  \begin{figure}[H]
+ \centering
+     \begin{subfigure}[scale=.3]{0.45\textwidth}
+        \centering
+        \includegraphics[width=1\linewidth]{A2/Voltage_Signals.JPG}
+		\caption{Integrated test input peak signal (Channel 1) and output analogue signal (Channel 1)} \label{subfig:v_ossc}
+     \end{subfigure}
+      \begin{subfigure}[scale=.4]{0.45\textwidth}
+        \centering
+  		\includegraphics[width=1\linewidth]{A2/noise_vtrans.JPG}
+		\caption{Noise on Analogue output}
+		\label{subfig:v_osc_noise}
+     \end{subfigure}
+     \caption{Voltage transducer practical measurements}
+\label{voltage_practical}
+ \end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\begin{tabular}[c]{@{}c@{}}Emulated Level\\ {[}\si{\milli\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Signal \\ Generator \\(theoretical)\\ {[}\si{\milli\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Signal \\ Generator\\(measured)\\ {[}\si{\milli\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Analogue\\  Output \\ {[}\si{\volt DC}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Deduced\\  Input \\ {[}\si{\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Difference \\ {[}\si{\milli\volt}{]}\end{tabular} \\ \hline
+16.00    &1000  &1030 &2.20  &16.00   &0.00\\ \hline
+21.00    &1313  &1360 &2.84  &20.65   &0.35\\ \hline
+21.15    &1322  &1360 &2.88  &20.95   &0.21\\ \hline
+21.30    &1332  &1370 &2.92  &21.23   &0.07\\ \hline
+26.00    &1625  &1670 &3.56  &25.89   &0.11\\ \hline
+\end{tabular}
+\caption{Voltage transducer unit-level tests}
+\label{v_test_unit}
+\end{table}
+
+ Table \ref{v_test_integr} summarizes information aimed at actual system-testing, i.e., when the \SI{20}{\volt AC} was connected to the peak detector's inputs. For table \ref{v_test_integr} \textbf{no curve-fit} was used.
+
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Measurement & \begin{tabular}[c]{@{}c@{}}Load\\  R \\ {[}\si{\ohm}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Load \\ C \\ {[}\si{\farad}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Measured \\ Input \\ {[}\si{\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Analogue \\ Output \\ {[}\si{\volt DC}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Deduced \\ Input\\  {[}\si{\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Difference \\ {[}\si{\milli\volt}{]}\end{tabular} \\ \hline
+No Load  & open  & none   &1.92  &4.03   &1.83  &90\\ \hline
+Full Load& 100   & none   &1.92  &3.80   &1.73  &190\\ \hline
+Mid range & 1k   & none   &1.92  &4.01   &1.82  &100\\ \hline
+\end{tabular}
+\caption{Voltage transducer integrated tests}
+\label{v_test_integr}
+\end{table}
+
+For the deduced columns in tables \ref{v_test_unit} and \ref{v_test_integr}, the following formula (obtained from the transfer function) was used to approximate the input:
+\begin{equation}
+    V_{Nominal Input}=\frac{1M}{1M+100k}\cdot \frac{1}{1+\frac{R_4}{R_3}}\cdot V_{Nominal Output}
+    \label{eq:voltage_delta}
+\end{equation}
+ where $V_{Nominal Output}$ is the DC analogue output and $V_{Nominal Input}$ is the voltage over $R_2$ in Fig. \ref{fig:voltage_system}. The formula contains the resistor-divider gain as well as the non-inverting op-amp gain. The system meets full range requirement as seen in Fig. \ref{v_test_unit}.
+
+
+% Here you can re-use the tables from Assignment 2. 
+% Here refer to Figures \ref{subfig:vtrans_meas_noload} and \ref{subfig:vtrans_meas_midload}.
+
+
+% \begin{figure}
+%  \footnotesize
+%  \centering
+%     \begin{subfigure}[]{0.45\textwidth}
+%               \centering
+%   		\includegraphics[width=1\linewidth]{./Figures/Screengrab}
+% 		    \caption{} \label{subfig:vtrans_simu_noload}
+%      \end{subfigure}
+%           \begin{subfigure}[]{0.45\textwidth}
+%              \centering
+%   		\includegraphics[width=1.0\linewidth]{./Figures/e-design_pwr_ac.pdf}
+% 		   \caption{ } \label{subfig:vtrans_meas_noload}
+%      \end{subfigure}
+%     \begin{subfigure}[]{0.45\textwidth}
+%               \centering
+%   		\includegraphics[width=1\linewidth]{./Figures/Screengrab}
+% 		    \caption{} \label{subfig:vtrans_simu_midload}
+%      \end{subfigure}
+%           \begin{subfigure}[]{0.45\textwidth}
+%              \centering
+%   		\includegraphics[width=1.0\linewidth]{./Figures/e-design_pwr_ac.pdf}
+% 		   \caption{ } \label{subfig:vtrans_meas_midload}
+%      \end{subfigure}
+%      \caption{Voltage transducer results. (a) No load simulated. (b) No load measured. (c) Mid-sized load simulated. (d) Mid-sized load measured. (c)} \label{fig:vtrans_results}
+% \end{figure}
+ 
+%**********************************************
+\section{Current transducer}\label{sec:itrans}
+%**********************************************
+
+\subsection{Design} \label{sec:itrans_design}
+
+The $0 \ to \ 285$ mA will be converted into a DC analogue voltage in the following manner:
+\begin{itemize}
+    \item Different load currents will be emulated by using different resistive load sizes. Consider the case of he maximum load current of $285$ mA as an example. This  will be when $R_{load}=100 \ \Omega$.
+    \item This will result in the voltage over $R_{sense}$ being a maximum, i.e., \\$V_{R_{sense}} \approx 8.55$ mV. Other current levels can be emulated in the same way.
+    \item $V_{R_{sense}}$ will be up-converted using the non-inverting op-amp U1 to \\$V_{Nominal Input}=151\cdot8.55m\approx 1.27$ V. $V_{Nominal Input}$'s peak will be detected then that voltage will be fed into the non-inverting op-amp U2 to be scaled to a voltage between 0 and 5 VDC.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[trim=0 5cm 0 4cm,scale=.4]{A2/Current_overleaf1.pdf}
+    \caption{Current transducer circuit}
+    \label{fig:current_diag}
+\end{figure}
+
+
+
+The operational functionality of the voltage peak detection sub-circuit dominated by U3 and U4 of the current transducer circuit is discussed in section \ref{sec:vtrans_design} and will not be repeated in this section.
+Op-amp characteristic voltages and surrounding components are considered and calculated as follows:
+\begin{itemize}
+ \item The common mode voltage, $V_{CM}$, for U3 and U4 which is the allowed input voltage at the positive and negative inputs of U3 and U4 are: $-5.3<V_{CM}<4$ [V] for supply voltages of \SI{+-5}{\volt DC} \cite{TLC2272}. Since $V_{Nominal Input}=1.3$ V at a maximum, the common mode voltages are satisfied at an ambient temperature, $T_A=$\SI{25}{\degreeCelsius} \cite{TLC2272}.\\The differential input voltage is $V_{diff}=$ \SI{+-16}{V_{peak}}, since there feedback on U3 and U4, the positive and negative inputs will be close to each other so that the differential input voltage specification is within bounds.
+\item The feedback resistor is chosen as $R_1=20\ k\Omega$ for the same reason in Section \ref{sec:vtrans_design}, i.e.,that it needs to be big for efficient voltage feedback and chosen for small currents.
+  \item Diodes $D_1$ and $D_3$ are chosen to be 1N4007 general diodes because they were the only provided. The forward resistance of $D_3$ is calculated as: $R_{diode}=\frac{V_T}{I_{diode}}=\frac{26m}{5\mu}\approx\SI{5.2}{\kilo\ohm}$, where $I_{diode}$ was chosen as the reverse peak current in
+  \cite{1N4007}. We also know that to design for a fast transient of the tracking the peak we can choose\cite{voltage_peak_detector}: $R_{diode}\cdot C_1 \leq \frac{1}{10}T  \ \ \ \therefore C_2\approx384.6 \ nF \ \ \ \therefore choose \  C_2=100\ nF$ for better response time (although we are more concerned about choosing a smaller capacitance value for reducing the ripple than for increasing response time).
+\end{itemize}
+
+The following components were also chosen for the current transducer system as a whole:
+\begin{itemize}
+    \item $R_{sense}=30 \ m\Omega$ for better voltage increments to support an ADC resolution of 10 bits. This resistor was chosen over the $5 \ m\Omega$ supplied due to the resolution considerations for the ADC.
+    \item Non-inverting gain op-amp U1 is chosen to amplify the voltage over  $R_{sense}$ for visible peak detection of the voltage peak detector. As we know, the voltage gain is calculated as: $A_v=1+\frac{R_3}{R_4}$. These resistors can be seen in Fig. \ref{fig:current_diag}. \\A voltage gain of 151 was chosen by setting $R_4=1 \ k\Omega$ and thus $R_3=150 \ k\Omega$ \\Non-inverting gain op-amp U2 is chosen to amplify the voltage at the output of the peak detector so that the output analogue voltage of the transducer would visibly be between 0 and 5 volt. As we know, the voltage gain is calculated as: $A_v=1+\frac{R_2}{R_5}$. These resistors can be seen in Fig. \ref{fig:current_diag}. \\A voltage gain of 3.2 was chosen by setting $R_5=1 \ k\Omega$ and thus $R_3=2.2\ k\Omega$.
+\end{itemize}
+
+The \hl{delta-input-output formula} can be seen in equation \ref{eq:delta_current}. In a functional summary, a 10 mA change decrease in $I_{R_{sense}}$ will make the output of the U1 decrease by some voltage $\delta V$. Then $V_{Nominal Input} \approx151\cdot\delta V$. This peak voltage is tracked by the voltage peak detector and finally fed into U2 Thus the output of U2, $V_{Nominal Output} \approx151\cdot\delta V\cdot3.2$. It must be noted that impact deviations on the input as a result of noise ($\SI{-37}{\milli \volt}$ and $\SI{46}{\milli \volt}$) on rail and input voltages result in minor changes at the peak detector output of a few mV. These minor errors are amplified by the non-inverting amplifiers \cite{non-inverting} and cause a few mV changes on $V_{Nominal Output}$, but not out of project tolerances \cite{assignment_2}.
+
+% \begin{figure}
+%  \footnotesize
+%         \includegraphics[width=1\linewidth]{./Figures/cctdia.pdf}
+% 		    \caption{Current transducer circuit diagram.} \label{subfig:itrans_circuit_diagram}
+%   \centering
+%  \end{figure}
+ 
+ \subsection{Simulation} \label{sec:itrans_simu}
+ 
+ %ref appen here
+The graphs in Fig. \ref{fig:nominal_current} (\hl{Appendix B}) show the nominal input at the input of the voltage peak detector of the current transducer, a step change of 10 mA is included to make sure that the requirement mentioned in the assignment guidelines \cite{assignment_2} is met. The output clearly shows a response within 1 second after 0.5 seconds. The circuit performs as expected for system input currents ranging between 0 and 285 \si{\milli\ampere} and thus the system functions properly.
+
+%  Here refer to Figures \ref{subfig:itrans_simu_noload} and \ref{subfig:itrans_simu_midload}.
+
+
+\subsection{Measurement} \label{sec:itrans_meas}
+
+The current peak transducer's analogue output at a mid-range load of \SI{1}{\kilo\ohm} is viewed on channel 2 of the oscilloscope is shown in Fig.\ref{subfig:current_sig}. When comparing this output to the analogue output in Fig. \ref{fig:nominal_current} (\hl{Appendix B}) for $t<0.5s$, they are very close meaning the design is successful. The AC component shown in Fig. \ref{subfig:current_noise} shows noise ranging from $\SI{-37}{\milli \volt}$ and $\SI{46}{\milli \volt}$. This ripple seen in Fig. \ref{subfig:current_sig} with an a periodic amplitude of 30.4 mV helps track the peak voltage due to the time constant formed by $C_2$. Table \ref{cur_test_unit} summarizes data for when the system is stimulated with varying voltages, i.e, if it could respond to a 10 mA change in one second and also the test was performed to test the reliability of the op-amp for the required (emulated) current levels \cite{assignment_2}.
+
+
+ \begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth,height=4.3cm]{A2/Current_Signals.JPG}
+    \caption{Integrated test input (Channel 1) and output analogue signal (Channel 2)}
+    \label{subfig:current_sig}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=\linewidth,height=4.3cm]{A2/noise_curr.JPG}
+   \caption{Noise on current transducer's analogue output}
+    \label{subfig:current_noise}
+\end{subfigure}
+\label{current_practical}
+\caption{Current transducer practical measurements}
+\end{figure}
+
+\begin{table}[H]
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\begin{tabular}[c]{@{}c@{}}Emulated Level\\ {[}\si{\milli\ampere_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Signal \\ Generator \\ {[}\si{\milli\volt}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Signal \\ Generator\\ {[}\si{\milli\volt}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Analogue\\  Output \\ {[}\si{\volt DC}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Deduced\\  Input \\ {[}\si{\milli\ampere_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Difference \\ {[}\si{\milli\ampere}{]}\end{tabular} \\ \hline
+0      &0.00  &0.00 &0.25  &17.25   &17.25\\ \hline
+50     &1.50  &1.26 &0.77  &53.12   &3.12\\ \hline
+100    &3.00  &2.25 &1.28  &88.30   &11.7\\ \hline
+101    &3.04  &2.29 &1.30  &89.68   &11.32\\ \hline
+102    &3.07  &2.32 &1.31  &90.37   &11.63\\ \hline
+200    &6.00  &5.69 &2.75  &189.1   &10.90\\ \hline
+285    &8.60  & 8.26&3.99  &270.8   &14.2\\ \hline
+
+\end{tabular}
+\caption{Current transducer unit-level tests}
+\label{cur_test_unit}
+\end{table}
+
+ Table \ref{cur_test_integrated} summarizes information aimed at actual system-testing, i.e., when the \SI{20}{\volt AC} was connected to the current transducer's s inputs. For table \ref{cur_test_integrated} \textbf{no curve-fit} was used.
+
+\begin{table}[H]
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\begin{tabular}[c]{@{}c@{}}Measure-\\ ment\\ \\ Load\end{tabular} & \begin{tabular}[c]{@{}c@{}}Load\\  R1 \\ {[}\si{\ohm}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Load \\ R2\\ {[}\si{\ohm}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Meas-\\ ured \\ Input Vr \\ {[}\si{\milli\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Actual \\ Input\\ {[}\si{\milli\ampere_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Analo-\\ gue\\ Output \\ {[}\si{\volt DC}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Deduced \\ Input\\  {[}\si{\milli\ampere_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Differ-\\ ence \\ {[}\si{\milli\ampere}{]}\end{tabular} \\ \hline
+None& open& none             &0.00  &0      &0.24 &0.02  &0.02\\ \hline
+Full& 100& none              &9.50  &296    &4.53 &312.5 &16.50\\ \hline
+Mid& 1k& none                &1.06  &30.40  &0.521&35.94 &5.54\\ \hline
+Mid + $\delta$& 1k&24k       &2.16  &31.67  &0.522&36.00 &4.33\\ \hline
+Mid + $2\delta$& 1k&12k      &2.52  &32.93  &0.555&38.29 &5.36\\ \hline
+\end{tabular}
+\caption{Current transducer integrated tests}
+\label{cur_test_integrated}
+\end{table}
+ 
+For the deduced columns in tables \ref{cur_test_unit} and \ref{cur_test_integrated}, the following formula (obtained from the transfer function) was used to approximate the input:
+\begin{equation}
+    I_{R_{sense}}=\frac{V_{Nominal Output}}{(1+\frac{R_3}{R_4})\cdot(1+\frac{R_2}{R_5})}\cdot \frac{1}{R_{sense}}
+    \label{eq:delta_current}
+\end{equation}
+where $V_{Nominal Output}$ is the DC analogue output and $I_{R_{sense}}$ is the current through the sense resistor in Fig. \ref{fig:current_diag}. The formula contains non-inverting op-amp gains of U1 and U2 as well as $R_{sense}$.
+
+% Here you can re-use the tables from Assignment 2.
+% Here refer to Figures \ref{subfig:itrans_meas_noload} and \ref{subfig:itrans_meas_midload}. 
+
+% \begin{figure}
+%  \footnotesize
+%  \centering
+%     \begin{subfigure}[]{0.45\textwidth}
+%               \centering
+%   		\includegraphics[width=1\linewidth]{./Figures/Screengrab}
+% 		    \caption{} \label{subfig:itrans_simu_noload}
+%      \end{subfigure}
+%           \begin{subfigure}[]{0.45\textwidth}
+%              \centering
+%   		\includegraphics[width=1.0\linewidth]{./Figures/e-design_pwr_ac.pdf}
+% 		   \caption{ } \label{subfig:itrans_meas_noload}
+%      \end{subfigure}
+%     \begin{subfigure}[]{0.45\textwidth}
+%               \centering
+%   		\includegraphics[width=1\linewidth]{./Figures/Screengrab}
+% 		    \caption{} \label{subfig:itrans_simu_midload}
+%      \end{subfigure}
+%           \begin{subfigure}[]{0.45\textwidth}
+%              \centering
+%   		\includegraphics[width=1.0\linewidth]{./Figures/e-design_pwr_ac.pdf}
+% 		   \caption{ } \label{subfig:itrans_meas_midload}
+%      \end{subfigure}
+%      \caption{Current transducer results. (a) No load simulated. (b) No load measured. (c) Mid-sized load simulated. (d) Mid-sized load measured. (c)} \label{fig:itrans_results}
+% \end{figure}
+
+%**********************************************
+\section{Phase-shift transducer}\label{sec:ptrans}
+%**********************************************
+
+\subsection{Design} \label{sec:phase_design}
+
+The phase shift will be converted to a analogue level in the following manner:
+\begin{itemize}
+    \item Two separate comparators will be used.
+    One to compare the nominal voltage signal (from the voltage peak detector) to zero (ground) and one to compare the voltage-represented current signal over the current sense resistor to zero. If the inputs (as seen in Fig. \ref{fig:phase_diag}), $V_{voltage-in}$ or $V_{current-in}$, is more than zero, the signal will be pulled to the positive rail (\SI{+5}{VDC} of the LM7805) of the op-amp. The voltage will be pulled to the negative rail (\SI{-5}{VDC} of the charge pump) if the input voltage $V_{voltage-in}$ or $V_{current-in}$ is less than zero.
+    \item Since the XOR CD4070B package works on a high TTL logic voltage \\$V_{OH}=$ \SI{5}{\volt DC} and a low logic voltage $V_{OL}=$ \SI{0}{\volt DC} \cite{CD4070b}. The output voltages of comparators U3 and U5 must have these maximum and minimum voltages. Therefore we use 1N4007 general purpose diodes to rectify he negative voltage of the comparator output to ground.
+    \item We will then able to use the XOR package since $V_{XOR-in1}$ and $V_{XOR-in2}$ as seen in Fig. \ref{fig:phase_diag} have high and low TTL levels.
+    \item The output of the XOR gate is defined as:$$V_{XOR-out}=V_{XOR-in1} \oplus V_{XOR-in2}$$ where $V_{XOR-out}$ represents a high voltage of \SI{5}{\volt DC} for the time when the signals $V_{voltage-in}$ and $V_{current-in}$ are out of phase. This can be illustrated through the use of a logic basis shown in logic rows 2 and 3 of table \ref{XOR_table}. 
+    \item The output of the XOR will represent a PWM signal. The DC voltage component of the signal is filtered out using a simple LPF. The filtered DC component is then amplified using a non-inverting gain op-amp to better suit the ranges as described in \cite{assignment_2}.
+\end{itemize}
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[trim=0 5cm 0 4cm,scale=.45]{A2/Phase_overleaf.pdf}
+    \caption{Phase transducer circuit}
+    \label{fig:phase_diag}
+\end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+Input 1   & Input 2   & Output       \\ \hline
+$V_{XOR-in1}$ & $V_{XOR-in2}$ & $V_{XOR-out}$ \\ \hline
+0         & 0         & 0            \\ \hline
+0         & 1         & 1            \\ \hline
+1         & 0         & 1            \\ \hline
+1         & 1         & 0            \\ \hline
+\end{tabular}
+\caption{Table showing output level scenarios for $V_{XOR-out}$}
+\label{XOR_table}
+\end{table}
+
+The characteristic op-amp voltages and design choices for the phase detector components are as follows:
+\begin{itemize}
+     \item The common mode voltage, $V_{CM}$, for U3 and U5 which is the allowed input voltage at the positive and negative inputs of U3 and U5 are: \\$-5.3<V_{CM}<4$ [V] for supply voltages of \SI{+-5}{\volt DC} \cite{TLC2272}. Since $V_{voltage-in}\approx \SI{2}{\volt_{peak}}$ and $V_{current-in}\approx \SI{1.3}{\volt_{peak}}$ at a maximum, the common mode voltages are satisfied at an ambient temperature, $T_A=$\SI{25}{\degreeCelsius} \cite{TLC2272}.\\The maximum differential input voltage is $V_{diff}=$ \SI{+-16}{V_{peak}}. We calculate the differential voltages for U3 and U5: $V_{U3_{diff}}=2-0=\SI{2}{V_{peak}}$ and $V_{U5_{diff}}=1.3-0=\SI{1.3}{V_{peak}}$. Both these voltages are less than $V_{diff}$ and differential conditions are met.
+     \item The op-amp gain design of U2 is calculated in Section \ref{sec:itrans_design}.
+     \item Diodes D1 and D2 are chosen as 1N4007 general purpose diodes. Also they are the only ones provided. They can support a reverse voltages up to \SI{700}{V_{RMS}} and up-to \SI{1}{\ampere} of forward currents \cite{1N4007} which is more than the absolute maximum ratings of the TLC2272 op-amps\cite{TLC2272}.
+     \item The LPF characterized by $R_1$ and $C_1$ in Fig. \ref{fig:phase_diag} is used to filter out the DC component in the frequency domain.
+     We calculate these values using: $f_c=\frac{1}{2 \pi R_1 C_1}$ \cite{DC_Analogue} where $f_c$ is the center frequency (DC-component frequency in frequency domain) of $V_{XOR-out}$, since the system frequency is \SI{50}{\hertz} \cite{DC_Analogue}, \\$f_c=\frac{50}{2}=25$ Hz $\therefore$ calculate the time constant as , $\tau_{1}=\SI{6.37}{\milli\second}=R_1 \cdot C_1$, choosing $R_1$=\SI{6.8}{\kilo\ohm}, $C_1$=\SI{0.94}{\micro\farad}. Here we want to minimize  signal ripple and maintain an average response speed $\therefore$ we experimentally choose $C_1$=\SI{55}{\micro\farad}. The new time constants is $\tau_{new}=\SI{374}{\milli\second}$. Which means that the phase analogue output achieves 63\% of the steady-state value within approximately one third of a second.
+     \item The simulated maximum output of the LPF will be close to \SI{0.8}{\volt DC}. Therefore we scale up the voltage using a non-inverting op-amp U4 with a voltage gain of  $A_v=6.6=1+\frac{R_5}{R_4}$. $\therefore$ choosing that $R_4=\SI{1}{\kilo\ohm}$, then $R_5=\SI{5.6}{\kilo\ohm}$
+\end{itemize}
+
+% \begin{figure}
+%  \footnotesize
+%         \includegraphics[width=1\linewidth]{./Figures/cctdia.pdf}
+% 		    \caption{Phase-shift transducer circuit diagram.} \label{subfig:ptrans_circuit_diagram}
+%   \centering
+%  \end{figure}
+
+\subsection{Simulation} \label{sec:ptrans_simu}
+%  Here refer to Figures \ref{subfig:ptrans_simu_Rload} and \ref{subfig:ptrans_simu_Zload}.
+
+The simulated graphs shown in Figures \ref{fig:phase22u} (\hl{Appendix B}) and \ref{fig:phase33u} (also Appendix B) show that in both cases, the DC analogue output reaches a voltage close to \SI{3.5}{\volt DC} at steady state. This is expected as there is only a slight difference in their current phase angles, i.e., $\Delta\phi_{I}=$\SI{0.7}{\degree} as calculated by: 
+$$\Delta\phi_{I}=\phi_{22u}-\phi_{33u}=\arctan(-\frac{1}{\omega\cdot R_1 \cdot 22\mu})-\arctan(-\frac{1}{\omega\cdot R_1 \cdot 33\mu}), \ \omega=2 \pi f=100 \pi$$
+
+
+\subsection{Measurement} \label{sec:ptrans_meas}
+
+ The phase transducer's analogue output at a mid-range load of \SI{1}{\kilo\ohm} and \SI{22}{\micro\farad}, as viewed on channel 2 of the oscilloscope is shown in Fig.\ref{subfig:phase_oscillo}. When comparing this output to the analogue output in Fig. \ref{fig:phase22u} (\hl{Appendix B}), they have a difference of \SI{0.5}{V} meaning the design is successful. The AC component shown in Fig. \ref{fig:phase_noise} shows noise ranging from $\SI{-9}{\milli \volt}$ and $\SI{24.6}{\milli \volt}$, this noise is minimum won't have significant effect on the output voltage. The ripple with an a periodic amplitude of 70 mV shown in Fig. \ref{subfig:phase_oscillo} is some of the unfiltered AC component of $V_{XOR-out}$. Table \ref{phase_table} summarizes data for when the system is stimulated with varying resistive and capacitive loads \cite{assignment_2}.  The conversion column values in table \ref{phase_table} were obtained by simulating different supply currents at different phase angles to fit the DC analogue level.
+% In this example the {\huge huge font size} is set and 
+% the {\footnotesize Foot note size also}. There's a fairly 
+% large set of font sizes.
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+     \centering
+    \includegraphics[height=4cm,width=\textwidth-0.5cm]{A2/phase_mid_range.jpg}
+    \caption{Phase XOR input AC signal(Channel 1) and analogue output level (Channel 2)}
+    \label{subfig:phase_oscillo}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+     \centering
+    \includegraphics[height=4cm,width=\textwidth]{A2/noise_phase.JPG}
+    \caption{Noise on analogue output of the phase transducer}
+    \label{fig:phase_noise}
+\end{subfigure}
+\label{phase_practical}
+\caption{Phase transducer practical measurements}
+\end{figure}
+
+
+\begin{table}[H]
+\begin{tabular}{|c|c|c|c|c|c|c|c|}
+\hline
+\begin{tabular}[c]{@{}c@{}}Measurement\end{tabular}       & \begin{tabular}[c]{@{}c@{}}Load\\  R \\ {[}\si{\ohm}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Load \\ C\\ {[}\si{\micro\farad}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Meas-\\ ured \\ Shift{[}\si{\milli\second}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Applied\\ Shift |$\phi$|\\ {[}\si{\degree}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Output\\ Level \\ {[}\si{\volt}DC]\end{tabular} & \begin{tabular}[c]{@{}c@{}}Conver-\\sion\\ {[}\si{\degree}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Differ-\\ ence \\ {[}\si{\degree}{]}\end{tabular} \\ \hline
+\begin{tabular}[c]{@{}c@{}}
+No \\ phase \\ shift\end{tabular}  & open& none&10&90&4.92&88.1&1.9\\ \hline
+\begin{tabular}[c]{@{}c@{}}
+Max\\  phase \\ shift\end{tabular} & 1k  & 3.3 & 0.32&43.97&1.4&40.1&3.87\\ \hline
+Mid range& 1k& 22&0.6&8.23&3.04&7.2&1.03\\ \hline
+Mid +s& 1k& 33&1.3&5.51&3.81&4.6&3.87\\ \hline
+Mid +2s& 1k& 47&1.4&3.87&3.89&2.6&1.27\\ \hline
+\end{tabular}
+\caption{Phase transducer integrated tests}
+\label{phase_table}
+\end{table}
+
+
+
+% Here you can re-use the tables from Assignment 2.
+% Here refer to Figures \ref{subfig:ptrans_meas_Rload} and \ref{subfig:ptrans_meas_Zload}. 
+
+% \begin{figure}
+%  \footnotesize
+%  \centering
+%     \begin{subfigure}[]{0.45\textwidth}
+%               \centering
+%   		\includegraphics[width=1\linewidth]{./Figures/Screengrab}
+% 		    \caption{} \label{subfig:ptrans_simu_Rload}
+%      \end{subfigure}
+%           \begin{subfigure}[]{0.45\textwidth}
+%              \centering
+%   		\includegraphics[width=1.0\linewidth]{./Figures/e-design_pwr_ac.pdf}
+% 		   \caption{ } \label{subfig:ptrans_meas_Rload}
+%      \end{subfigure}
+%     \begin{subfigure}[]{0.45\textwidth}
+%               \centering
+%   		\includegraphics[width=1\linewidth]{./Figures/Screengrab}
+% 		    \caption{} \label{subfig:vtrans_simu_Zload}
+%      \end{subfigure}
+%           \begin{subfigure}[]{0.45\textwidth}
+%              \centering
+%   		\includegraphics[width=1.0\linewidth]{./Figures/e-design_pwr_ac.pdf}
+% 		   \caption{ } \label{subfig:vtrans_meas_Zload}
+%      \end{subfigure}
+%      \caption{Phase-shift transducer results. (a) Resistive load simulated. (b) Resistive load measured. (c) Mid-sized capacitive load simulated. (d) Mid-sized capacitive load measured. (c)} \label{fig:ptrans_results}
+% \end{figure}
+
+
+\vspace{-1cm}
+
+\section{Summary and implementation}
+% State whether your design performs as expected. 
+We can conclude that the voltage, current and phase transducers perform well enough to provide peak detection and load phase information when a certain resistive or capacitive load is connected. The noise on transducer outputs won't effect ADC representations.
+
+\begin{figure}[H]
+    \centering
+  	\includegraphics[scale=0.33]{Picures/transducerpic.PNG}
+	\caption{Implementation of the transducer circuitry} \label{subfig:transducer_pcb}
+ \end{figure}

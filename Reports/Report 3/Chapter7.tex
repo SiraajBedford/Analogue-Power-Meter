@@ -1,0 +1,62 @@
+\chapter{System and conclusion}
+\vspace{-1cm}
+\section{System}
+
+% Photo of your student card next to your PCB. Indicate the functional blocks of your PBC here (preferably by overlaying blocks using something like powerpoint. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=1]{A3/final_sys.pdf}
+    \caption{Complete PCB and student card witch labels for functional blocks} 
+    \label{fig:PCB}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[trim={0cm 2.5cm 0 2cm},clip,scale=0.4]{A3/21093741_diag.pdf}
+    \caption{Full LTSpice circuit diagram}
+    \label{fig:21093741}
+\end{figure}
+
+% trim={<left> <lower> <right> <upper>}
+
+Fig. \ref{fig:PCB} shows the complete PCB with student card in unique ID for the final version of the project. Fig. \ref{fig:21093741} shows the final LTSpice diagram for all components till the final version of the project. All current supplied by the voltage regulators were sufficient enough such that they did not come close to the designed or set maximum. The project was built to completion and all design choices resulted in all the requirements of the project \cite{project_overview} being met.
+
+\section{Lessons learned}
+% Write down at least five of the most important things you have learned or lessons you acquired from E344.
+The following lessons were learned during the course of the module
+\begin{itemize}
+    \item If a design takes too long or many changes need to be made on a known working circuit model, it is usually the wrong design. There has to be a simpler way.
+    \item Accuracy/Precision sometimes need to be traded for the new functionality to work cohesively with previously built sub-systems.
+    \item You should not struggle for a long time when pertaining to logic. A small logic error that you do not understand can cost time that you could be working on other sub-systems/code. You should understand the logic perfectly (it is possible since they lead to definite outcomes) by looking at forums and conversing with someone who understands it instead of wasting time.
+    \item Unit-level testing on sub-systems (especially those that will report information digitally) can significantly improve accuracy of reported values. This can further be improved by using curve-fitting over reliable steps from  system input to output.
+    \item Digital design integrates easily with analogue design. This is useful to easily represent information from the analogue design to the designer and potentially a product user who has no technical understanding of a product.
+    \item Simulation can be a useful tool if the correct models can be obtained to approximate a final outcome.
+    \item Usually the design of an electronic circuit with the most essential components work more reliably.
+    \item Do not measure current with a multi-meter where you expect to measure enormous currents since the multi-meter  has a minute current-sensing resistor.This small resistor in parallel with the high-current load damages the internal electronics of the multi-meter.
+    \item Good workmanship (clean soldering) will not make you doubt the mechanical structure of a sub-system if it does not behave in the intended manner.
+    \item Taking out time for PCB space-planning saves a lot of time in the future since you will not hve significant empty space on you PCB that could be used for other sub-systems e.g., adding more ground base-boards than necessary could decrease mechanical stability of the final system which could lead to electrical instability.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

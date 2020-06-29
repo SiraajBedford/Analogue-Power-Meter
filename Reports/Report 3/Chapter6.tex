@@ -1,0 +1,51 @@
+\chapter{Extra functionality} \label{ch:Extra_functionality}
+
+% Be very clear about what the extra functionality is, and convince the reader. 
+
+\section{ON and OFF debug buttons in the GUI}
+
+
+
+%Python code highlighting
+\begin{lstlisting}[language=Python, caption=Debug On/Off  button setup]
+
+self.request_button = ttk.Button(self,command = self.DebugModeON, text="Debug Mode ON")
+self.request_button.grid(column=1, row=5, sticky="WE", columnspan=1)
+
+self.request_button = ttk.Button(self,command = self.DebugModeOFF, text="Debug Mode OFF")
+self.request_button.grid(column=2, row=5, sticky="WE", columnspan=1)
+
+\end{lstlisting}
+
+
+%Python code highlighting
+\begin{lstlisting}[language=Python, caption=Debug On/Off function setup]
+
+def DebugModeON(self):
+    
+            if self.connection.is_connected():
+                self.connection.write(b"X1")
+                self.connection.write(b"\n")
+                self.printSerialReturn()
+                self.DEBUGMODE = True
+                self.return_text.config(state='normal')
+                self.return_text.insert(END,"\n"+'Debug-Mode On')
+                self.return_text.config(state='disabled')
+                self.return_text.see("end")
+                
+def DebugModeOFF(self):
+    
+            if self.connection.is_connected():
+                self.connection.write(b"X0")
+                self.connection.write(b"\n")
+                self.DEBUGMODE = False
+                self.type_entry.config(state='normal')
+                self.return_text.config(state='normal')
+                self.return_text.insert(END,"\n"+'Debug-Mode Off')
+                self.return_text.config(state='disabled')
+                self.return_text.see("end")
+                self.printSerialReturn()
+
+\end{lstlisting}
+
+The GUI buttons for turning on and off the debug mode can be seen in Fig. \ref{fig:GUI} and are coded in Listing 6.1. More attention should be paid to Listing 6.2. In both functions we first check if the device is connected via the serial bus. Then we send a byte, "X1" by calling "connection.write(b,"X1")" on "\textit{self}" to turn debug mode on or we send "connection.write(b,"X0")" to turn debug mode off. We end off by printing a message a message to the terminal to indicate debug status. The functionality makes it easier for the user so they don't have to repeatedly type in the command.

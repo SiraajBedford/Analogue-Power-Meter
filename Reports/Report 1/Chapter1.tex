@@ -1,0 +1,35 @@
+\chapter{Power supply system design}
+\section{System overview} \label{sec:literature_system}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=.75]{Figures/sys.pdf}
+    \caption{System diagram}
+    \label{fig:system_diagram}
+\end{figure}
+
+% Here you insert a block diagram of your power regulation system. There is no need to specify the capacitor and resistor values here, but you want to capture the higher-level functional arrangement you have opted for. The diagram ties together the other chapters in this report and helps the reader understand how you have connected the transformer, rectifer, and regulation types into a solution to provide \SI{5}{VDC} and \SI{-5}{VDC}. This diagram can also indicate the ground configuration. See Fig.\ \ref{fig:system_diagram} as an example which is one level too high. 
+
+The system shown in Fig.\ \ref{fig:system_diagram} shows the overall approach to generate the $+5 \text{ VDC}$ and $-5 \text{ VDC}$ supply voltages for the other components to be added in later sections of the Design (E) 334 project.
+
+
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width = 0.5\linewidth]{Figures/PowerSystemDiagram.pdf}
+%     \caption{System diagram}
+%     \label{fig:system_diagram}
+% \end{figure}
+
+\section{Rationale}\label{sec:rationale_system}
+% Here you describe your rationale for using the setup you have chosen. The detail design of each subsystem (e.g. linear regulation) does not go here, but goes in the appropriate chapter.  You can point forward to the sections, for example, the rectification detail design is described in Section \ref{sec:design_rectifier}.
+
+The input supply to the system was a voltage of $230 \text{ VAC}$ at 50 Hz from a common wall-socket supply. This was too dangerous to use, so a transformer was used to lower it to a voltage of  $18 \text{ VAC}$ which was safer to work with. To supply power to the components in future design of the project, the AC-voltage needed to be converted to a usable DC-voltage. As such rectification and regulation had to be added to the system. The simple usage of a capacitor and general rectification diode was used to achieve rectification. The use of a switchmode regulator was used to output a 12 VDC signal to use. Firstly it was used an input to a linear regulator to obtain a $+5 \text{ VDC}$ supply. Secondly it was used in a charge pump scheme in combination with a square wave  as an input to a BJT current source system to generate a $-5 \text{ VDC}$ voltage. The charge pump needed a square-wave with a magnitude of 5 V as an input at 10 kHz to output the $-5 \text{ VDC}$ voltage. The $+5 \text{ VDC}$ and $-5 \text{ VDC}$ are to be used for supplying power to operational amplifiers in later designs of the project.
+
+
+
+
+
+
+
+

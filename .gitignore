@@ -1,0 +1,15 @@
+*.lib
+*.asc
+*.raw
+*.log
+*.jpg
+*.jpeg
+*.pdf
+*.PNG
+*.zip
+*.lof
+*.lot
+*.asy
+*.db
+*.plt
+*.emf

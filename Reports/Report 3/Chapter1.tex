@@ -1,0 +1,49 @@
+
+\chapter{System design}
+\vspace{-1cm}
+\section{System overview} \label{sec:system}
+% Here you insert a block diagram of your operational signal conditioning system. 
+% Try to explain \textbf{what} configuration you chose and \textbf{why}. 
+% There is no need to specify the capacitor and resistor values here, but you want to capture the higher-level functional arrangement you have opted for. The diagram ties together the other chapters in this report and helps the reader understand how you have connected the different functional blocks together to produce the outputs. For example, a block could be ``Differential aplifier'' or ``level shifting op-amps'' or the like. 
+% Fig.\ \ref{fig:system_diagram} as an example that is completely irrelevant and just holds space for your beautiful system diagram. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.38]{Figures/A3.pdf}
+    \caption{System diagram}
+    \label{fig:system_diagram}
+\end{figure}
+
+The system shown in Fig.\ \ref{fig:system_diagram} shows the overall approach for the completed design project. It includes functional blocks representing the following functionality:
+\begin{itemize}
+    \item Power conversion: This includes stepping down the mains power supply using a \SI{240}{VAC} to  \SI{18}{VAC} transformer. A half-wave rectifier is then used to convert the \SI{18}{VAC} to an approximate DC voltage of \SI{30}{VDC}, including little ripple. A switching regulator, \cite{TI:LM2595} is used to turn this rippling \SI{30}{VDC} into a constant \SI{12}{VDC} voltage. This voltage is further regulated to a + \SI{5}{VDC} supply voltage for the operational circuitry. A \SI{-5}{VDC} voltage is obtained by using a BJT current source and charge-pump scheme to use for the operational circuitry as well.
+    \item Signal Conditioning: Here we aim to represent RMS system voltage, current and phase as a DC voltage ranging between 0-5 VDC. This is accomplished using operational amplifier circuitry with voltage peak detecting circuits \cite{VPD}, voltage buffers and non-inverting amplifiers for the voltage and current transducers. The phase transducer uses voltage and current-represented signals in combination with XOR logic and an RC low-pass filter \cite{DC_Analogue}. These peak detectors support resistive and capacitive loads ranging with a load current, $0 \leq I_{load}< 295$ \si{\milli\ampere} protection when not controlled by over-current p.
+    \item Over-current protection: Over-current protection is used to keep current exceeding \SI{200}{mA} from flowing through the load.  A comparator is used to compare the current transducer output to a constant voltage representing 200 mA in 0-5 VDC range, the same range for the current transducer output. The output of this comparator is passed to the "reset" pin of an SR latch \cite{SR_Latch}. The "set" pin of the SR latch is configured as a digital output of a digital pin of the Arduino Leonardo beetle \cite{beetle} which remains low, until the "set" pin sends a pulse to the SR latch to reset the latch. When the latch logic represents a "1" corresponding to a +5 VDC, the opto-triac switch remains in a conducting state. When the latch logic represents a "0" corresponding to a +0 VDC, the switch remains in a non-conducting state until reset via the a pulse from the Arduino beetle.
+    \item PC interaction and micro-controller over-voltage pin protection: The voltage, current and phase transducers output voltages are read in via the built-in ADC on the Arduino beetle and convert to digital number between 0 and 1024. These voltages are read in via the analogue pins. Since they are inputs to the micro-controller board, we wish to protect the pins from over-voltage protection, this is accomplished using a diode-clamping circuit \cite{Diode_clamping}. The subsequent ADC values are substituted into the following formula to obatain the voltages at the analogue pins: $$V_{pin}=ADC_{value} \cdot \frac{5V}{2^{10}}$$
+    where:
+    \begin{itemize}
+        \item $V_{pin}$, ranges between 0 and 5 volts.
+        \item $\frac{5V}{2^{10}}$ represents a singular step in the ADC range.
+    \end{itemize}
+\end{itemize}
+
+
+\section{Regulator (voltage source) current consideration}\label{sec:rationale_system}
+% Here you describe your rationale for using the setup you have chosen. The detail design of each subsystem (e.g. linear regulation) does not go here, but goes in the appropriate chapter.  You can point forward to the sections, for example, the rectification detail design is described in Section \ref{sec:design_rectifier}.
+
+The total current draw on voltage sources for the op-amps must be considered as they will be essential for providing power to all system components involving logic and circuit protection.
+
+\begin{itemize}
+    \item The + \SI{5}{VDC} supplies 7 TLC2272 op-amps, an XOR package and 4 diode clamping circuits. The  LM7805 linear +\SI{5}{\volt DC} regulator has a maximum current draw limit of \SI{100}{\milli\ampere} \cite{LM7805}.The regulator needs to supply \SI{20}{\milli\ampere}, which is less than the maximum it can supply.
+    \item The - \SI{5}{VDC} supplies 5 TLC2272 op-amps. It needs to supply \SI{20}{\milli\ampere}, which is less than the designed maximum it can supply.
+\end{itemize}
+
+
+
+
+
+
+
+
+
+

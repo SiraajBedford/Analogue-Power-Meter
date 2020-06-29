@@ -1,0 +1,81 @@
+\chapter{Reporting} \label{ch:reporting}
+
+
+\vspace{-1cm}
+\section{Design} \label{sec:rep_design}
+
+% Here give a flow diagram or psuedo-code listing of your Arduino code and a flow diagram or psuedo-code of your Python code. 
+
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.53]{A3/Codeflow.pdf}}
+    \caption{Arduino and Python flow chart with important connections}
+    \label{fig:APcodeflow}
+\end{figure}
+
+The flow diagram in Fig. \ref{fig:APcodeflow} shows the most important connections between the Python and Arduino code from the application, protocol and hardware structure levels. 
+On the hardware level, the USB connections from the PC communicate to with the DFR beetle by means of an FT-DI chip on the micro-controller board. The python GUI interface communicated to the serial port on the USB via "connection.py" and in turn,the micro-controller UART interprets the digital and analogue pins of the micro-controller via "serial.py". The most important interaction between the Python and Arduino code is the functions written in the arduino code and how they communicate with the Python GUI.
+A unique byte representing a function in arduino is sent from Python every time a button is pressed on the GUI. This calls on the function in arduino to return relevant calculations on the data received on the digital and analogue pins. The pins functional states can be seen in Fig. \ref{fig:microC}.
+
+% Give a circuit diagram and/or description of how you connected the grounds vs voltages and how you protected the interface to the Beetle agains over-voltage conditions. 
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.8]{A3/beetle.pdf}}
+    \caption{DFRobot Arduino Leonardo beetle pinout}
+    \label{fig:microC}
+\end{figure}
+
+The pins of the Arduino beetle are connected and configured in the following manner:
+
+\begin{itemize}
+    \item A0, A1 and A2 are the analogue input pins of the micro-controller. The on-board ADC of the Arduino beetle converts the transducer values as seen connected in Fig. \ref{fig:microC} to a digital number between 0 and 1024. The higher the digital number at the output of the ADC the higher the voltage at the pin. This ADC used is a 10-bit ADC and thus the resolution is enough to accurately measure the quick-changing transducer outputs. These voltages are converted to relevant RMS voltage, current and phase using the relevant delta-input-output (transfer) functions and fitting functions for current and phase. Clamping of 5V is applied to the analogue pins because they are relatively closely connected to the mains supply. Any big transient with respect to the mains supply could affect the transducer outputs to damage the USB ports.
+    \item Digital pin D9 is used as an output for the built-in PWM of the micro-controller. The functions \textbf{pwm91011configure (int mode)} and \textbf{pwmSet9 (int value)}  (as seen in Fig.\ref{fig:APcodeflow}) are used to configure output pin D9 with the timer and to set the duty cycle of the PWM output for the clock of the charge pump described in section \ref{sec:Charge_Pump}  respectively.
+    \item Digital pin D10 is used as a digital output pulse to reset the SR latch when indicating the switch has tripped.
+    \item Digital pin D11 is configured as an input. It is connected at the output side of the internal LED of the opto-triac such that when the LED is on, the trip status will be presented as a "HIGH" on the GUI.
+    \item A digital pin can be configured as an input or output by using the arduino function \textbf{pinMode(pin\_number, state)}, where the state can be \textit{INPUT} or \textit{OUTPUT}.
+\end{itemize}
+
+\section{Results} \label{sec:rep_results}
+% Show some screen grabs of your GUI. 
+
+\begin{figure}[H]
+    \centering
+    \fbox{\includegraphics[scale=0.8]{A3/GUI.PNG}}
+    \caption{Graphical User Interface showing reported RMS voltage, current with phase and trip status}
+    \label{fig:GUI}
+\end{figure}
+
+Fig. \ref{fig:GUI} shows the resultant interface programmed in Python using TkInter \cite{TkInter}. Attention is drawn to the "TRIP" status in the figure. Different loads (resistive and capacitive) were applied across the terminal as proved by the changing RMS current and phase values until the \SI{100}{\ohm} load was applied, then the "TRIP" status reported "LOW". The SR Latch described in \ref{sec:OC} was then reset as seen in  Fig. \ref{fig:GUI}. Debug mode was then re-activated and the terminal started producing expected values again, thus \hl{our design was a success}.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

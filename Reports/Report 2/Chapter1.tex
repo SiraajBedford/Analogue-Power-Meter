@@ -1,0 +1,15 @@
+\chapter{Signal conditioning system design}
+\section{System overview} \label{sec:system}
+The operational amplifier circuitry follows the functional diagram shown in Fig \ref{fig:system_diagram} (Appendix C).
+The \SI{+-5}{\volt \ DC} supply voltages are used to supply the functional voltage, current and phase transducers. The  \SI{+5}{\volt DC} is supplied using the LM7805 linear voltage regulator \cite{LM7805} and the \SI{-5}{\volt  DC} is supplied using a charge pump design with an input  oscillator frequency of $10$ \si{\kilo\hertz} .These peak detectors support resistive and capacitive loads ranging with a load current, $0 \leq I_{load}< 300$ \si{\milli\ampere}.
+
+
+\section{Design Rationale} \label{sec:current_rationale}
+The total current draw on voltage sources for the op-amps must be considered as they will be essential for the TTL logic \cite{TTL_logic} that the op-amps will use. The  LM7805 linear +\SI{5}{\volt DC} regulator has a maximum current draw limit of \SI{100}{\milli\ampere} \cite{LM7805}, the \\-\SI{5}{\volt DC} output of charge pump can supply a maximum current draw of \\$I_{-5V} \approx$ \SI{25}{\milli\ampere}. A total of 6 TLC2272 \cite{TLC2272} op-amps and an XOR package were supplied by LM7805 and 5 op-amps were supplied by the \SI{-5}{\volt DC}. In total each supply, supplies \SI{10}{\milli\ampere}, which is less than the maximum they both can supply, as such there will be enough power to supply to the op-amps.
+
+
+
+
+
+
+

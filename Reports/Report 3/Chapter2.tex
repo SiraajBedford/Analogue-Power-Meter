@@ -1,0 +1,158 @@
+\chapter{Power conversion}\label{ch:power_conversion}
+%**********************************************
+%\section{Design} \label{sec:pwr_design}
+%**********************************************
+\vspace{-2cm}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.4, angle=-90]{A1/newdiag1.pdf}
+    \caption{System power conversion diagram from LTSpice including rectification, switchmode regulation, linear regulation and charge-pump scheme}
+    \label{fig:all_power}
+\end{figure}
+
+\vspace{-1cm}
+
+\section{Design} \label{sec:design_rectifier}
+
+\subsection{Rectifier}
+
+A diode and capacitor combination can be used to rectify an AC-voltage to an approximate DC-voltage. A half-wave rectifier can be used to accomplish this \cite{half-wave}. The capacitor size for rectification needs to be taken into account because it supplies continuous current to the circuit. We consider: $I_{load}  = C \cdot \frac{dv}{dt}$. For a maximum current value of 200 mA through a resistive load and a ripple of $V_r = dv = V_{high} - V_{low} =\SI{14}{V_{RMS}} $. $V_{low}$ is 4.5 V and a $V_{high} = 45$ for the switchmode rectifier, thus the ripple voltage needs to be less than 40.5 V \cite{TI:LM2595}.The known period of the input signal is $T = \frac{1}{50} = 0.02 \text{ s}$ and then $\tau = \frac{T}{2} = 0.01 s$. Then by $I_{load}  = C \cdot \frac{dv}{dt}$, we could calculate the capacitor value as $150 \text{ uF}$. The 1N4007 rectification diode is since they can handle reverse voltages up to 700 V RMS and large forward currents (up to 1 A) \cite{1N4007}. The capacitor is chosen as a low ESR capacitor denoted by C5 in Fig. \ref{fig:all_power} and the diode is denoted by D3. The output of the half-wave rectifier is shown as the output label "Rectifier\_Output" in Fig. \ref{fig:all_power}.
+
+\subsection{Switchmode Regulation}
+
+ A switching regulator uses an active device that switches on and off to maintain an average value of output \cite{regulators_theory}.  In Fig. \ref{fig:all_power}, there are a number of passive components, namely $C_6,\ C_7, \ R_4, \  R_5$, $C_{FF}$ and $L_1$ (U2 is the switching regulator) whose values are recommended in \cite{TI:LM2595} for a constant voltage output of the switchmode regulator. They are the following:
+\begin{itemize}
+    \item In \cite{TI:LM2595} the following equation is given in regards to an adjustable output voltage: $ V_{OUT} = V_{REF}(1 + \frac{R_5}{R_4}) \label{eq:differential}$ since we want the output voltage to be 12 V, $V_{OUT} = 12 V$ and $V_{REF} = 1.23 V$ (given in \cite{TI:LM2595}). Also $R_4 = 1 \text{ k} \Omega$ . As such we choose a standard e12 resistance, $R_5 = 8.2  \text{ k} \Omega$ to gives us an output voltage close to 12 V by equation \ref{eq:differential}.
+    \item $C_{6} = C_{7} = 122 \ \mu F$, which is the closest to the $120 \ \mu F$ specified in \cite{TI:LM2595}. ESR was not considered as a simplified design choice.
+    \item $D_1$ is a 1N5822, 3 A, 40 V Schottky rectifier diode as specified in \cite{TI:LM2595}.
+    \item set $L_1 = 68 \  \mu H$ since it is the only inductor available and guarantees more load current than needed by the project requirements.
+    \item $R_5$ (chosen as $8.2  \text{ k} \Omega$) and $C_{FF}$  determine the value of the output voltage of the regulator. What we want to do is obtain a  $+5 \text{ VDC}$ and $-5 \text{ VDC}$ supply. We will be using the MC78L05 linear regulator to supply the $+5 \text{ VDC}$ supply. The maximum input voltage to this regulator is 30 V \cite{LM7805} and due to the dropout voltage for this regulator being 1.7 V \cite{LM7805}, the minimum input voltage is $V_{Min} = V_{Reg} + V_{Dropout} = 5 + 1.7 = 6.7$ V . So a choice for the output voltage of the switchmode regulator being $V_{switch} = 12$ V is suitable.
+    \item  The feedback capacitance as specified in \cite{LM2595} is $ C_{FF} = \frac{1}{31(10^3)} \cdot R_6 \label{eq:cap}$ which gives us $C_{FF} \approx 4$ nF.
+\end{itemize}
+
+\subsection{Linear regulation}
+In electronics, a linear regulator is a system used to maintain a steady voltage. The resistance of the regulator varies in accordance with the load resulting in a constant voltage output. The regulating device is made to act like a variable resistor, continuously adjusting a voltage divider network to maintain a constant output voltage and continually dissipating the difference between the input and regulated voltages as waste heat \cite{regulators_theory}. Linear regulation is accomplished using the MC78L05 regulator. This is represented by functional block U1 in Fig. \ref{fig:all_power}. The typical application is found in \cite{LM7805}. Passive components $C_1 \ and \ C_2$ are included in this application.
+The input capacitor, denoted by $C_{1} = 0.33 \mu$F is used to smooth the input voltage so that it usable for the internal electronics and $C_{2} = 0.1 \mu$F reduces transients and high-frequency noise on the output.
+We also consider the maximum current the regulator to check support for all the op-amps and logic packages and  at the worst case of an ambient temperature of \SI{45}{\degree C}:$ I_{max} = \frac{T_j-T_{ambient}}{R_{\theta JA}(V_{in}-V_{out})}=\frac{150-45}{150(12-5)}=100 \ mA$. This is more than enough supply all the current-drawing components in the worst thermal case.
+
+\subsection{Charge Pump} \label{sec:Charge_Pump}
+A charge pump is a kind of DC to DC converter that uses capacitors for energetic charge storage to raise or lower voltage. Charge-pump circuits are capable of high efficiencies, sometimes as high as 90–95\%, while being electrically simple circuits \cite{CHPump}.
+Charge pumps cannot output a lot of current due to periodic switching nature. In this project we only use the \SI{-5}{VDC} to supply the negative op-amp rails. The absolute maximums negative rail current is 2.8 mA, so we choose to design for a current of 20 mA.
+For the switching of capacitors, we use a NPN-type BJT combination to switch the states of the capacitors.
+
+% \begin{itemize}
+%     \item The PWM pulse amplitude from micro-controller is \SI{5}{\volt DC} at $f_{PWM}=\SI{1}{\kilo \hertz}$ with a $50 \%$ duty cycle. We start by taking a KVL-loop at the base-emitter loop at transistor Q1, resulting in $R_1=\frac{5-0.7}{I_{C1}/\beta}, \beta=80$, design for $I_{C1}=\SI{12}{\milli \ampere}$, then $R_1\approx \SI{29}{\kilo \ohm}$, set $R_1 = \SI{1}{\kilo \ohm}$.
+%     \item Design for $V_{C3}>V_{C3_{sat}},  \ where \  V_{C3_{sat}}=0.2 \ V$, $V_{C3}=2V$. $R_3=\frac{12-2}{\SI{12}{\milli \ampere}}\approx 833 \Omega$ then set $R_3 = \SI{1}{\kilo \ohm}$.
+%     \item Q2 and Q3 form a power transistor pair. Transistor mismatch will be neglected. Design for a current of \SI{70}{\milli \ampere} through the collector of Q3. Then for bias stability and also for designing a \SI{1}{\volt} drop across the emitter resistor $R_8=\frac{1}{70 mA}\approx 15\Omega$. Set $R_8 = \SI{33}{\ohm}$.
+%     \item $ I_{R_2} = \frac{I_{C3}\approx I_{E3}}{\beta}\approx\frac{70m}{100}=\frac{5-0.7}{R_8\beta+R_2} $. Then we can calculate $R_2=\SI{2.8}{\kilo \ohm}$. Set $R_2 = \SI{1}{\kilo \ohm}$.
+%     \item The current at the base of Q2 us more than that of Q3. Set $R_2 = \SI{3.9}{\kilo \ohm}$.
+%     \item Calculate $C_3$ by $\tau=10 \cdot t_{conduction}=R_{load} \cdot C_3=100 \cdot C_3=10 \cdot \frac{1}{2\cdot \SI{1}{\kilo \hertz}\cdot 5} \ \therefore C_3=\SI{10}{\micro \farad}$
+%     \item Let $C_4=10 \cdot C_3=\SI{100}{\micro \farad}$ to limit ripple voltage.
+%     \item The zener diode is used to regulate the output voltage to -5 V.
+% \end{itemize}
+The PWM pulse amplitude from micro-controller is \SI{5}{\volt DC} at $f_{PWM}=\SI{1}{\kilo \hertz}$ with a $50 \%$ duty cycle. We start by taking a KVL-loop at the base-emitter loop at transistor Q1, resulting in $R_1=\frac{5-0.7}{I_{C1}/\beta}, \beta=80$, design for $I_{C1}=\SI{12}{\milli \ampere}$, then $R_1\approx \SI{29}{\kilo \ohm}$, set $R_1 = \SI{1}{\kilo \ohm}$.
+Design for $V_{C3}>V_{C3_{sat}},  \ where \  V_{C3_{sat}}=0.2 \ V$, $V_{C3}=2V$. $R_3=\frac{12-2}{\SI{12}{\milli \ampere}}\approx 833 \Omega$ then set $R_3 = \SI{1}{\kilo \ohm}$.
+Q2 and Q3 form a power transistor pair. Transistor mismatch will be neglected. Design for a current of \SI{70}{\milli \ampere} through the collector of Q3. Then for bias stability and also for designing a \SI{1}{\volt} drop across the emitter resistor $R_8=\frac{1}{70 mA}\approx 15\Omega$. Set $R_8 = \SI{33}{\ohm}$.
+$ I_{R_2} = \frac{I_{C3}\approx I_{E3}}{\beta}\approx\frac{70m}{100}=\frac{5-0.7}{R_8\beta+R_2} $. Then we can calculate $R_2=\SI{2.8}{\kilo \ohm}$. Set $R_2 = \SI{1}{\kilo \ohm}$.
+The current at the base of Q2 us more than that of Q3. Set $R_2 = \SI{3.9}{\kilo \ohm}$.
+Calculate $C_3$ by $\tau=10 \cdot t_{conduction}=R_{load} \cdot C_3=100 \cdot C_3=10 \cdot \frac{1}{2\cdot \SI{1}{\kilo \hertz}\cdot 5} \ \therefore C_3=\SI{10}{\micro \farad}$
+Let $C_4=10 \cdot C_3=\SI{100}{\micro \farad}$ to limit ripple voltage. A zener diode regulates the output voltage to -5 V. In practical, we set $C_4=C_3=\SI{220}{\micro \farad}$ so current output is a maximum.
+
+\section{Simulation} \label{sec:simulation_rectifier}
+% In this section, you want to demonstrate, by means of simulation results, using the designed circuit, what your circuit is expected to behave. An example is the figure shown in Figure \ref{fig:simulation_results_box} or Sub-figure \ref{subfig:AC}. Be absolutely sure that the text and information in your report are readable. 
+
+A simultaneous simulation was done for the half-wave rectifier, switch-mode regulator, linear regulator as well as the charge pump as can be seen in Fig. \ref{fig:allsignals}.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.3, angle=-90]{A1/final_res1.pdf}
+    \caption{Simulation showing rectifier output, switchmode regulator output, linear regulator (\SI{5}{VDC}) output and charge-pump (\SI{-5}{VDC}) output}
+    \label{fig:allsignals}
+\end{figure}
+
+%Rectifier
+The rectifier output is represented by "V(rectifier\_ouput)" in Fig. \ref{fig:allsignals}. The ripple voltage shown is $V_r=V_{High}-V_{Low}=29.99-28.6 \approx 1.4 V$ is not the ripple voltage under a full-load (e.g. $100 \Omega$ as seen in Fig. \ref{fig:measuredripple}). The simulation is successful. The switchmode output is represented by "V(+12v\_switchmode)" as seen in Fig. \ref{fig:allsignals}. The time for the regulator to achieve steady-state is approximately 5 ms (negligible) and the steady output voltage is 11.28 V (around 12 V), which is what we have designed for so the design is successful. The linear regulator output is represented by "V(+5v\_lm7805)" as seen in Fig. \ref{fig:allsignals}. As we designed, the output voltage is very close to 5 V and the time to achieve steady-state is (negligible). The charge-pump output is represented by "V(-5v\_charge\_pump)" as seen in Fig. \ref{fig:allsignals}. As we designed, the output voltage is very close to -5 V. It is \SI{-4.7}{VDC} due to the zener diode model used in SPICE. 
+
+
+
+
+\section{Measurements} \label{sec:measurements_rectifier}
+
+\begin{figure}[H]
+ \footnotesize
+ \centering
+    \begin{subfigure}[]{0.45\textwidth}
+        \centering
+      	\includegraphics[scale=0.7]{A1/realRipple.JPG}
+        \caption{Measured voltage ripple for 100 $\Omega$}
+        \label{fig:measuredripple}
+    \end{subfigure}
+    \begin{subfigure}[]{0.45\textwidth}
+        \centering
+      	\includegraphics[scale=0.23,angle=-90]{A1/ripple_full1.pdf}
+        \caption{Simulated voltage ripple for 100 $\Omega$}
+        \label{fig:simripple}
+    \end{subfigure}
+    \begin{subfigure}[]{0.45\textwidth}
+        \centering
+        \includegraphics[scale=0.6]{A1/real_switchmode_output.JPG}
+        \centering
+        \caption{Measured switchmode regulator output}
+        \label{fig:Switch_out_real}
+    \end{subfigure}
+    \begin{subfigure}[]{0.45\textwidth}
+        \centering
+        \includegraphics[scale=0.6]{A1/12V_noise.JPG}
+        \centering
+        \caption{Switchmode regulator noise}
+        \label{fig:switch_noise}
+     \end{subfigure}
+        \begin{subfigure}[]{0.45\textwidth}
+        \centering
+        \includegraphics[scale=0.6]{A1/+5Volt.JPG}
+        \caption{Measured linear regulator output}
+        \label{fig:linear_reg_out}
+    \end{subfigure}
+    \begin{subfigure}[]{0.45\textwidth}
+        \centering
+        \includegraphics[scale=0.6]{A1/+5Voltnoise.JPG}
+        \caption{Linear regulator noise}
+        \label{fig:linear_reg_noise}
+    \end{subfigure}
+    \begin{subfigure}[]{0.45\textwidth}
+        \centering
+        \includegraphics[scale=0.6]{A1/-5Volt.JPG}
+        \caption{Measured output for -5 V}
+        \label{fig:-5V output measured}
+    \end{subfigure}
+    \begin{subfigure}[]{0.45\textwidth}
+        \centering
+        \includegraphics[scale=0.6]{A1/-5Voltnoise.JPG}
+        \caption{Measured noise output for -5 V}
+        \label{fig:-5V output}
+    \end{subfigure}
+    \caption{Rectifier and voltage supply outputs with noise}
+\end{figure}
+
+
+In figure \ref{fig:measuredripple}, we measure the peak ripple as $V_{ripple}=V_{High}-V_{Low}=20 \  V_{peak}$ we then compare to the ripple found in simulation as seen in Fig. \ref{fig:simripple}. $V_{ripple \ simulation}=29.8-11\approx 18.8  \ V_{peak}$. We can therefore say that the half-wave rectifier performs what it is designed to do.
+
+We next consider the switchmode regulator. We obtain the measured result for the output voltage as seen in figure \ref{fig:Switch_out_real}. The maximum steady output voltage is shown to be 11.9 V. This corresponds well to our simulation. The noise was also measured as seen in figure \ref{fig:switch_noise}. We can see that the noise is contained between $\SI{-16}{\milli \volt}$ and $\SI{90.4}{\milli \volt}$. It is switching noise and is an appropriate level to ignore effects on the linear regulator and charge pump regulator. It can be concluded that our measured results agree with our simulated results.
+
+The measured output for the linear regulator as seen in figure \ref{fig:linear_reg_out} matches the simulated result. Thus we can conclude that our design was successful. The output is very steady and will be able to supply big resistive loads with enough current for their operations. The noise of the linear regulator is very important because it must be small enough such that the op-amps connected  must not be affected by the noise on the op-amp rails. This could disturb the functioning of the op-amps. In figure \ref{fig:linear_reg_noise} we can see that the noise level is approximately between $\SI{-20}{\milli \volt}$ and $\SI{20}{\milli \volt}$. These are acceptable levels and noise will not impact op-amp rails. 
+
+Figure \ref{fig:-5V output measured}  shows the practical output of the charge-pump circuit. It clearly shows a voltage close to -5 V. Thus our DC level is acceptable. A 1 kHz signal was used for the switching transistors of the charge pump. This does have an effect on the noise of the charge pump. We can see the noise in Fig. \ref{fig:-5V output}. The switching noise is apparent and is approximately between $\SI{-55}{\milli \volt}$ and $\SI{60}{\milli \volt}$. This is good enough such  it does not effect the noise on the output of the transducers mentioned in sections \ref{sec:vtrans}, \ref{sec:itrans} and \ref{sec:ptrans}.
+
+
+
+\section{Summary and implementation}
+
+We can conclude that all power circuitry works efficiently enough to supply all components in the project when also taking into consideration the effect of nose on the relevant sub-systems mentioned in this chapter. With regards to implementation, the switchmode regulator served as a good enough component to supply secondary power sources needed by op-amps for level detection. The rectification state did not impose a problem on the switch regulator and the \SI{+-5}{VDC} will be able to supply enough current to op-amps in Chapter 3. A snapshot of the power conversion circuitry is found in Figure \ref{subfig:pwr_pcb}.
+    
+\begin{figure}[H]
+    \centering
+  	\includegraphics[scale=0.31]{Picures/powerpic.PNG}
+	\caption{Implementation of the power conversion circuitry. } \label{subfig:pwr_pcb}
+ \end{figure}
+

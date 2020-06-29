@@ -1,0 +1,139 @@
+\chapter{Rectifier}
+\section{Theory and related work} \label{sec:literature_rectifier}
+% In this section, you put a very short summary of information you gathered from literature (papers, web sites, data sheets) that you used to do the design. Be sure to include the references, which you can add in the \texttt{References.tex} file. 
+
+% Some examples of how to cite (all in \texttt{References.bib}): 
+% It was stated by \cite{Booysen:2013} that ... . Subsequently, he changed his mind and said in  \cite{Gerber:2019} that ... .
+% While \cite{WebsiteOpAmp} claims it to be ... .
+
+A diode and capacitor combination can be used to rectify an AC-voltage to an approximate DC-voltage. The diode transforms a sinusoidal input into an output with no negative sinusoidal part. The negative voltage becomes zero volts, resulting in a signal with only positive sinusoidal peaks. This signal is then passed through a parallel smoothing capacitor to approximate a DC-voltage as seen in figure \ref{fig:Halfwave}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{Figures/Halfwave.JPG}
+    \caption{Half-wave rectifier theory}
+    \label{fig:Halfwave}
+\end{figure}
+
+
+\section{Design} \label{sec:design_rectifier}
+
+The capacitor size for the rectification section needed to be taken into account because it would need to supply continuous current to the circuit. The continuous supply of current is heavily dependant on how much current this capacitor can discharge in a short interval of time. With regards to the capacitor value we consider the following equation:
+
+\begin{equation}\label{eq:1}
+    I_{load}  = C \cdot \frac{dv}{dt}
+\end{equation}
+
+If we choose that we would need a maximum current value of around 200 mA through a resistive load and choose a ripple voltage in RMS of $V_r = dv = V_{high} - V_{low} = 14 V $. We can choose this ripple voltage because in \cite{TI:LM2595} $V_{low}$ is 4.5 V and a $V_{high} = 45$ for the switchmode rectifier, thus the ripple voltage needs to be less than 40.5 V. We also know that the period of the input signal is $T = \frac{1}{50} = 0.02 \text{ s}$ and then approximate the time constant as $\tau = \frac{T}{2} = 0.01 s$. Then by \ref{eq:1} we could calculate the capacitor value as $150 \text{ uF}$.
+
+The choice of the diode for the rectification circuit was a general rectification diode, the 1N4007 diode. This is because it specified for use in single  phase, half wave, 60Hz, resistive or inductive load system \cite{DiodesI:1N4007}. Although it is specified for 60 Hz, we use it for a 50 Hz analogue system.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.7]{Figures/RectifierPic.JPG}
+    \caption{Rectifier Circuit diagram}
+    \label{fig:Sim_rect}
+\end{figure}
+
+% I usedn this section, you need to capture your design, which should include the following: 
+% \begin{itemize}
+%   \item Design rationale, i.e. what your thinking was behind the design
+%   \item Design calculations, for example to determine resistor values and capacitor values, or to check for allowed voltage and current ranges and levels. 
+%   \item Circuit diagram like the one in Figure \ref{fig:circuit_diagram}. I used ``print to PDF'' from LTSpice,  but feel free to use a cropped screen-grab if you are PDF-challenged and do not have a PDF printer (there are some free PDF creators online).
+% \end{itemize}
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width = 0.6\linewidth]{Figures/Circuit.pdf}
+%     \caption{A circuit diagram of sorts}
+%     \label{fig:circuit_diagram}
+% \end{figure}
+
+% For your benefit, here is how to write values with units: \SI{150}{\milli\Omega}, and this is how we write ranges: \numrange{2}{5} \si{\kilo\volt}.
+
+% Here is a numbered equation in Eq. \ref{eq:myNumberedEquation}.
+% \begin{equation}
+%   a = \frac{55}{45+3}
+%   \label{eq:myNumberedEquation}. 
+% \end{equation}. 
+
+% Here is an inline equation $ \frac{55}{45+3}$. 
+
+\section{Simulation} \label{sec:simulation_rectifier}
+% In this section, you want to demonstrate, by means of simulation results, using the designed circuit, what your circuit is expected to behave. An example is the figure shown in Figure \ref{fig:simulation_results_box} or Sub-figure \ref{subfig:AC}. Be absolutely sure that the text and information in your report are readable. 
+
+\begin{figure}[H]
+\centering
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[scale=.3]{Figures/RectifierPicGraph.JPG}
+  \caption{Simulated RMS ripple voltage curve when a resistive load of 100 Ohm is connected}
+  \label{fig:sub1}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[scale=1]{Figures/lineRectified.JPG}
+  \caption{Simulated RMS rectified output}
+  \label{fig:sub2}
+\end{subfigure}
+\label{fig:sim_rectified}
+\end{figure}
+
+One thing that needed to be considered in the calculation of the capacitor in \ref{eq:1} was the ripple voltage. This was simulated and is seen in \ref{fig:sub1} and varies between 8 V and 22 V. We can see that the simulated output of the rectifier circuit \ref{fig:Sim_rect} should be a straight horizontal function representing a DC voltage.
+
+\section{Measurements} \label{sec:measurements_rectifier}
+
+\begin{minipage}{0.5\textwidth}
+\begin{figure}[H]
+\includegraphics[scale=.65]{Figures/realRipple.JPG}
+\centering
+\caption{Measured ripple voltage over 100 Ohm}
+\label{fig:measured ripple}
+\end{figure}
+\end{minipage} \hfill
+\begin{minipage}{0.45\textwidth}
+In figure \ref{fig:measured ripple} we see the that the voltage ripples up to 20 $V_{RMS}$. This does agree with the simulated ripple voltage limit. It was also measured that the rectified voltage had a peak value of $V_{peak} \approx 31 \text{ V}$ after the smoothing capacitor. This does reinforce the simulated result in \ref{fig:sub2}.
+\end{minipage}
+
+% In this section, you must present your measured results. You can use screen-grabs or photos of the oscilloscope, or download the CSVs and plot them as PDFs using Matlab, Excel or similar. 
+% You can also use tables, example of which are presented in Tables \ref{tab:table1} and \ref{tab:table2}.
+
+
+% \begin{table}
+%         \centering
+%         \footnotesize
+%         \caption{Example of a table.}
+%          \begin{tabular}{c@{\qquad}rrrr}
+%           \toprule
+%              & 2017 & 2018 & $\Delta_{Abs}$ & $\Delta_{DiD}$\\
+%           \midrule
+%           A & 9,868      & 10,399 & +5 & -11\\
+%           B & 10,191     & 10,590 & +4 & -12\\
+%           \bottomrule
+%         \end{tabular}
+%      \label{tab:table1}
+% \end{table}
+
+
+% \begin{table}
+%          \centering
+%         \footnotesize
+%         \caption{Example of another table.}
+
+%          \begin{tabular}{c@{\qquad}rrrr}
+%           \toprule
+%           \multirow{2}{*}{\raisebox{-\heavyrulewidth}{Schools }} & \multicolumn{2}{c}{Total energy used}& \multicolumn{2}{c}{Change}\\
+%           \cmidrule{2-5}
+%             & 2017 & 2018 & $\Delta_{Abs}$ & $\Delta_{DiD}$\\
+%             & [kWh] & [kWh] & [\%] & [\%] \\
+%           \midrule
+%           A & 9,868      & 10,399 & +5 & -11\\
+%           B & 10,191     & 10,590 & +4 & -12\\
+%           \bottomrule
+%         \end{tabular}
+%      \label{tab:table2}
+% \end{table}
+
+
+
+

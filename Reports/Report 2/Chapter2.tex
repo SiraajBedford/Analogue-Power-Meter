@@ -1,0 +1,99 @@
+\chapter{Voltage peak transducer}
+
+\section{Theory and related work} \label{sec:Voltage_peak_detector}
+
+A voltage peak detector (also known as an envelope detector) is an electronic circuit that takes a (relatively) high-frequency amplitude modulated signal as input and provides an output which is the envelope (peak) of the original signal \cite{VPD}. The peak voltage is especially monitored when one or more digital components are added to the system power bus. A positive peak detector captures the most positive peak of the voltage signal at its input \cite{precision_peak_detector}. Simple peak detection circuits only require a diode and capacitor combination, but since the diode has a forward bias voltage drop over it, some error is incurred on the peak value. A precision peak detector can be used to get rid of this error.
+
+\section{Design} \label{sec:design_vpd1}
+The design is chosen as a precision peak detector as described in \cite{voltage_peak_detector}. It is functionally controlled by U1 and U2 as follows: For the first case, the capacitor, $C_1$ is initially fully discharged, as such there is no voltage across it. This means that the voltage at the output of buffer amplifier U1 is also zero (discharged) which is also the case at the positive junction of $D_3$.\\At some time when a positive voltage, $V_{Nominal Input}$ is applied at $U_2$, $D_3$ becomes reversed bias and $D_1$ will become forward biased and the capacitor will get charged through the input loop to the peak voltage due to KVL.Since we know that $D_3$ is reverse biased and under the assumption that no current flows into the  negative input terminal of U2, we can assume that the current flowing through the feedback resistor $R_5$ is also zero. Therefore the voltage that appears at the output will be the same as that of the negative input of U2. For the second case, we consider when the input voltage goes below the peak voltage. Then $D_1$ will become reversed biased and the feedback loop will become undone. Then the negative input terminal of U2 will be at the peak voltage. The positive input of U2 will be less than that of the negative input and the output will momentarily become negative. Therefore $D_3$ will become forward biased, providing U2 with negative feedback such that it does not tend to negative saturation.
+$D_1$ is now reverse biased and prevents $C_1$ from discharging. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[trim=0 5cm 0 4cm,scale=.4]{Figures/Voltage_overleaf.pdf}
+    \caption{Voltage transducer circuit}
+    \label{fig:voltage_system}
+\end{figure}
+
+
+As stipulated in the assignment guidelines \cite{assignment_2}, the peak detector circuit shall have a minimum input of  \SI{12}{\volt AC} and a maximum input of \SI{20}{\volt AC}. These high RMS voltages will be stepped-down using a voltage-divider circuit. The mains voltage supply is $V_2$ in Fig. \ref{fig:voltage_system}. $V_2=$\SI{20}{\volt AC} $\approx$ \SI{30}{\volt_{peak}}. Thus we choose \SI{250}{\milli\watt}-rated resistors, $R_1=1.5\ M\Omega$ and $R_2=100 \ k\Omega$ for the following reasons:
+
+\begin{itemize}
+    \item The voltage divider formula is: $V_{Nominal Input}=\frac{R_2}{R_1+R_2}\cdot V_{2}$ which guarantees a voltage close to \SI{2}{\volt AC}
+    \item $V_{Nominal Input}\approx$ \SI{2}{\volt AC} at its maximum, which is in-between the common-mode voltages chosen for the design configuration of the TLC2272 \cite{TLC2272} op-amps for the positive and negative supply voltages of \SI{+5}{\volt DC} and \SI{-5}{\volt DC} respectively of U1 and U2 as seen in \ref{fig:voltage_system}.
+\end{itemize}
+
+This stepped-down voltage's ($V_{Nominal Input}$) peak which can range from 0 to \SI{2}{\volt AC} is tracked by the precision detector. The characteristic voltages and component design choices for the peak detector are as follows:
+\begin{itemize}
+  \item The common mode voltage, $V_{CM}$, for U1 and U2 which is the allowed input voltage at the positive and negative inputs of U1 and U2 are: $-5.3<V_{CM}<4$ [V] for supply voltages of \SI{+-5}{\volt DC}
+  at an ambient temperature, $T_A=$\SI{25}{\degreeCelsius} \cite{TLC2272}.\\The differential input voltage, $V_{diff}=$ \SI{+-16}{V_{peak}}, since there feedback on U1 and U2 the positive and negative inputs will be close to each other the differential input voltage limit is met.
+  \item $R_5$ is a low-voltage feedback resistor, so current is minimal through it. Set $R=$\SI{10}{\kilo\ohm} for very low current values.
+  \item Diodes $D_1$ and $D_3$ are chosen to be 1N4007 general diodes because they were the only provided. The forward resistance of $D_1$ is calculated as: $R_{diode}=\frac{V_T}{I_{diode}}=\frac{26m}{5\mu}\approx\SI{5.2}{\kilo\ohm}$
+  where $I_{diode}$ was chosen as the reverse peak current in
+  \cite{1N4007}. We also know that to design for a fast transient of the tracking the peak we can choose \cite{voltage_peak_detector}: $R_{diode}\cdot C_1 \leq \frac{1}{10}T$ or better yet for faster response time: $R_{diode}\cdot C_1 \leq \frac{1}{1000}T \ \ \ \therefore C_1\approx3.8 \ nF \ \ \ \text{choose } C_1=1\ nF$
+\end{itemize}
+
+The system was designed to take the voltage output of the peak detector (the output of U1) and scale it up to a voltage ranging closer to \SI{5}{\volt DC} for better visibility. This was done by using a non inverting op-amp, U3, in Fig. \ref{fig:voltage_system} with a gain calculated using the gain formula in \cite{non-inverting}: $A_v=1+\frac{R_4}{R_3} $.
+A gain of 2.2 was decided on to get $V_{Nominal Input}\approx5\ VDC$ for full range. So choose $R_3=\SI{1}{\kilo\ohm}$, then $R_4=\SI{2.2}{\kilo\ohm}$.\\\\ 
+In a functional summary, a 1 volt change increase in $V_{Nominal Input}$ will make the output of the peak detector increase by some voltage $\delta V$. Then $V_{Nominal Output} \approx2.2\cdot\delta V$.
+It must be noted that impact deviations on the input as a result of noise on rail and input voltages result in minor changes at the peak detector output of a few mV. These minor errors are amplified by the non-inverting amplifier \cite{non-inverting} and cause a few mV changes on $V_{Nominal Output}$, but not out of project tolerances \cite{assignment_2}.
+
+\section{Simulation} \label{sec:simulation_rectifier}
+ %ref appen here
+The graphs in Fig. \ref{fig:nomial_voltages} (Appendix B) show the nominal input at the input of the peak detector, a step change to make sure that the requirement mentioned in the assignment guidelines \cite{assignment_2} is met and the output voltage of the voltage peak detector is also shown. The output clearly shows a response within 1 second after 0.5 seconds. The circuit performs as expected for system input voltages ranging between 12 and 20 \si{\volt AC}.
+ 
+\section{Measurements} \label{sec:measurements_voltage}
+
+The voltage peak detector's analogue output at a mid-range load of \SI{1}{\kilo\ohm} is viewed on channel 2 of the oscilloscope is shown in Fig.\ref{subfig:v_ossc}. When comparing this output to the analogue output in Fig. \ref{fig:nomial_voltages} for $t<0.5s$, they are very close (a 4 mV difference) meaning the design is successful. The AC component shown in Fig. \ref{subfig:v_osc_noise} does \textbf{not show} noise but rather the small-amplitude ripple of the DC output. Table \ref{v_test_unit} summarizes data for when the system is stimulated with varying voltages, i.e, if it could respond to a 1 V change in one second and also the test was performed to test the reliability of the op-amp for the required (emulated) peak voltages \cite{assignment_2}.
+
+  \begin{figure}[H]
+ \centering
+     \begin{subfigure}[scale=.3]{0.45\textwidth}
+        \centering
+         \includegraphics[width=1\linewidth]{Figures/Voltage_Signals.JPG}
+		\caption{Integrated test input peak signal (Channel 1) and output analogue signal (Channel 1)} \label{subfig:v_ossc}
+     \end{subfigure}
+      \begin{subfigure}[scale=.4]{0.45\textwidth}
+              \centering
+  		\includegraphics[width=1\linewidth]{Figures/Voltage_Noise.JPG}
+		\caption{Noise on Analogue output}
+		\label{subfig:v_osc_noise}
+     \end{subfigure}
+     \caption{Voltage transducer practical measurements}
+\label{voltage_practical}
+ \end{figure}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\begin{tabular}[c]{@{}c@{}}Emulated Level\\ {[}\si{\milli\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Signal \\ Generator \\(theoretical)\\ {[}\si{\milli\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Signal \\ Generator\\(measured)\\ {[}\si{\milli\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Analogue\\  Output \\ {[}\si{\volt DC}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Deduced\\  Input \\ {[}\si{\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Difference \\ {[}\si{\milli\volt}{]}\end{tabular} \\ \hline
+16.00    &1000  &1030 &2.20  &16.00   &0.00\\ \hline
+21.00    &1313  &1360 &2.84  &20.65   &0.35\\ \hline
+21.15    &1322  &1360 &2.88  &20.95   &0.21\\ \hline
+21.30    &1332  &1370 &2.92  &21.23   &0.07\\ \hline
+26.00    &1625  &1670 &3.56  &25.89   &0.11\\ \hline
+\end{tabular}
+\caption{Voltage transducer unit-level tests}
+\label{v_test_unit}
+\end{table}
+
+ Table \ref{v_test_integr} summarizes information aimed at actual system-testing, i.e., when the \SI{20}{\volt AC} was connected to the peak detector's inputs. For table \ref{v_test_integr} \textbf{no curve-fit} was used.
+
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|c|}
+\hline
+Measurement & \begin{tabular}[c]{@{}c@{}}Load\\  R \\ {[}\si{\ohm}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Load \\ C \\ {[}\si{\farad}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Measured \\ Input \\ {[}\si{\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Analogue \\ Output \\ {[}\si{\volt DC}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Deduced \\ Input\\  {[}\si{\volt_{peak}}{]}\end{tabular} & \begin{tabular}[c]{@{}c@{}}Difference \\ {[}\si{\milli\volt}{]}\end{tabular} \\ \hline
+No Load  & open  & none   &1.92  &4.03   &1.83  &90\\ \hline
+Full Load& 100   & none   &1.92  &3.80   &1.73  &190\\ \hline
+Mid range & 1k   & none   &1.92  &4.01   &1.82  &100\\ \hline
+\end{tabular}
+\caption{Voltage transducer integrated tests}
+\label{v_test_integr}
+\end{table}
+
+For the deduced columns in tables \ref{v_test_unit} and \ref{v_test_integr}, the following formula (obtained from the transfer function) was used to approximate the input:$$V_{Nominal Input}=\frac{1M}{1M+100k}\cdot \frac{1}{1+\frac{R_4}{R_3}}\cdot V_{Nominal Output}$$ where $V_{Nominal Output}$ is the DC analogue output and $V_{Nominal Input}$ is the voltage over $R_2$ in Fig. \ref{fig:voltage_system}. The formula contains the resistor-divider gain as well as the non-inverting op-amp gain.
+

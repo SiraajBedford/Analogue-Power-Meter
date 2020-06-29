@@ -1,0 +1,33 @@
+\chapter{System tests}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=.4]{Figures/FullPCB.JPG}
+    \caption{Final constructed circuit with student card and bar-coded ID}
+\end{figure}
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|}
+\hline
+Signal & Noise Maximum {[}mV{]} & Noise minimum {[}mV{]} \\ \hline
++5 V   & 36.0            &-38.0         \\ \hline
+-5 V   & 64.0                       & -32.0                       \\ \hline
+\end{tabular}
+\caption{Table of supply voltage noises}
+\label{supply_noise_table}
+\end{table}
+ The above table shows noise values when all transducers are simultaneously working and is obtained from figures \ref{fig:+5V_noise} and  \ref{fig:-5V_noise} in Appendix D.
+A 100 $\Omega$ load was used measure current. The voltage before and after the resistor can be seen in Fig. \ref{fig:system_current} in Appendix D. Using KCL for full system load: $$I_{system}=\frac{V_{max_{peak}}-V_{min_{peak}}}{100}=\frac{29.2-38.4m}{100}\approx\SI{291}{\milli\ampere}$$ 
+% Here you include an image of your PCB (showing your barcoded ID) and any system-level tests you deem appropriate. For example, the total current drawn by the opamp circuitry. 
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,63 @@
+\chapter{Charge pump regulation}
+\section{Theory and related work} \label{sec:literature_chargepump}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=.8]{Figures/C_Pump_Diag.JPG}
+    \caption{Charge pump circuit}
+    \label{fig:C_pump_theorydiag}
+\end{figure}
+
+The input to the charge pump pump circuit must at least be 6.4 V, due to voltage drops across both diodes seen in . As the input steps up from 0V to 6.4V, the negative plate on C1 will also try to match due to capacitive coupling. However, once the plate reaches 0.7V, D1 conducts and this prevents the plate voltage from getting higher than 0.7V. Now with the positive plate at 6.4V and the negative plate at 0.7V, the potential difference across the plate is 6.4 – 0.7 = 5.7V. When the positive plate drops rapidly from 6.4V to 0V, this 5.7V potential difference must be maintained due to coupling. Therefore, the negative plate drops to -5.7V. D1 cannot conduct as it is reversed biased, so this negative voltage remains on the capacitor.D2, however, is now conducting because the anode (connected to C2 negative plate), is at a higher potential than the cathode (connected to the -5.7V). Therefore, the voltage at the negative plate of C2 will reduce until D2 stops conducting. D2 will stop conducting once the voltage drop across it becomes less than 0.7V. This will happen once the negative plate of C2 becomes -5.7 - (-0.7) = -5V. \cite{C_Pump_Site}
+But if an external device attempts to use the negative voltage, it would very quickly be used up! This is because of the relatively small sizes of C1 and C2 as well as the current limits of the circuit driver. The solution is to connect an oscillator to the input so that a negative voltage is constantly being generated at C1, which keeps C2 topped up.
+C2 is used as a decoupler for external devices using the negative voltage to try and keep the value as constant as possible.\cite{C_Pump_Site}
+
+\section{Design} \label{sec:design_chargepump}
+We need to design a current source at the input side of the charge pump so supply current to charge the capacitor $C_1$. 
+We can make a simple current source using three NPN transistors.
+Also at the output side of the charge pump, we need to find a way to clip the voltage if it ever exceeds 5 volts. This can be done with a Zener diode.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=.5]{Figures/ChargePumpDiagScheme.pdf}
+    \caption{Negative voltage supply scheme}
+    \label{fig:C_pump_theorydiag}
+\end{figure}
+
+We make $V_{CC}$ = 12 V which is the output of the switchmode regulator. Because it is difficult to calculate the remaining resistor values exactly, we will simulate the circuit and adjust the values to obtain a -5 V supply at the output.
+
+This results in the following LTSpice diagram:
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1.3]{Figures/C_Pump_Diag_ltspice.JPG}
+    \caption{LT Spice simulation circuit}
+    \label{fig:LTSpice-5V}
+\end{figure}
+
+\section{Simulation} \label{sec:simulation_chargepump}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=.7]{Figures/ltspice_transient.JPG}
+    \caption{Simulation output for -5 V}
+    \label{fig:-5V output}
+\end{figure}
+
+As seen in figure \ref{fig:-5V output} , the output is indeed close to -5 V as we have designed for. This is due to the fact that only a 4.7 V zener diode was a available as a SPICE model. We can say that our design and trial and error simulation resulted in a -5 V simulated signal.
+
+\section{Measurements} \label{sec:measurements_chargepump}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1]{Figures/Measured_Minus5.JPG}
+    \caption{Mesured output for -5 V}
+    \label{fig:-5V output measured}
+\end{figure}
+
+Figure \ref{fig:-5V output measured}  shows the measured signal of the physically build charge pump scheme. I clearly shows a voltage close to -5 V. A 10 kHz signal were used as stimuli to the bases of the two driving transistors. It was noticed that when the frequency was dropped in reality, the voltage went down closer to -5 V. 
+
+
+
+
+
